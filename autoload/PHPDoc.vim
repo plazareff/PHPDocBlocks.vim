@@ -43,7 +43,8 @@ function! s:parseFunction(codeBlock)
         return ['error','No function name detected']
     endif
 
-    l:paramsList = s:parseFunctionParameters(l:nameAndParams[4])
+    l:testString = l:nameAndParams[4]
+    l:paramsList = s:parseFunctionParameters(l:testString)
 
     " TODO: @return and @throws
 
