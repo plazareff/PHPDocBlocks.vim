@@ -42,18 +42,15 @@ function! s:parseFunction(codeBlock)
     if l:nameAndParams == []
         return ['error','No function name detected']
     endif
-
-    l:testString = l:nameAndParams[4]
-    l:paramsList = s:parseFunctionParameters(l:testString)
-
+    let l:paramsList = s:parseFunctionParameters(l:nameAndParams[4])
     " TODO: @return and @throws
 
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDoc = ['/**',
                    \' *',
-                   \' * '.l:nameAndParams[2],
-                   \' *****'] + l:paramsList
-                 \+ ['*/']
+                   \' ** '.l:nameAndParams[2],
+                   \' *'] + l:paramsList
+                 \+ [' */']
 
     " Loop through each line and add the appropriate indent
     let l:x = 0
