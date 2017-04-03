@@ -1,6 +1,3 @@
-let s:save_cpo = &cpo
-set cpo&vim
-
 " TODO: Edit existing doc block if exists
 " TODO: methods (@return / @throws), classes, consts, file, interfaces, traits
 " TODO: Editable templates for each doc block type
@@ -47,6 +44,9 @@ function! s:parseFunction(codeBlock)
 
     " TODO: Test multiple return statements, if same types for all, use that
     " type, if EXPLICITLY diff types, use mixed
+    " TODO: Look for method calls (current class only)? - if has docblock with
+    " return type, use that (must be the only return) (if all returns type is
+    " knowable and diffrerent, could use mixed as type)
     " Match a return keyword at the start of a line (must be 1 return only)
     let l:return = ""
     let l:numOfReturns = len(split(a:codeBlock, '\v[\n](\s)*return(\s)+[^;]+[;]')) - 1
@@ -61,15 +61,32 @@ function! s:parseFunction(codeBlock)
     endif
     let l:return .= " * @return ".l:returnType
 
-    " TODO: @throws
-    " throws new \Exception("message");
+    " TODO: Nested throw new inside a catch block - prioritize the throw new
     " try {} catch(\Exception $var) {}
+    let l:throwsRegex = ['\v\}(\s|\n)*catch(\s|\n)*\((.{-})(\s|\n)+[\$](.{-})\)(\s|\n)*\{',
+                        \'\vthrow(\s|\n)+new(\s|\n)+((\\[A-Z]|[A-Z])(.{-}))\((.{-})\)[;]']
+    let l:throwsList = []
+    let l:throws = ["",0,0]
+    for regex in l:throwsRegex
+        while 1
+            let l:throws = matchstrpos(a:codeBlock, regex, l:throws[2])
+            let l:throwsName = matchlist(l:throws[0], regex)
+            if l:throws[2] != -1
+                call add(l:throwsList, " * @throws ".l:throwsName[3])
+                continue
+            endif
+            break
+        endwhile
+    endfor
+
+    " throws new \Exception("message");
+
 
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDoc = ['/**',
                    \' *',
                    \' * '.l:nameAndParams[2],
-                   \' *'] + l:paramsList
+                   \' *'] + l:paramsList + l:throwsList
     if l:return != ""
         call add(l:phpDoc, l:return)
     endif
@@ -172,6 +189,3 @@ function! s:getCodeBlock()
     return join(getline(l:blockStart, l:blockEnd), "\n")
 
 endfunction
-
-
-let &cpo = s:save_cpo
