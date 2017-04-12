@@ -1,5 +1,5 @@
 " TODO: Edit existing doc block if exists
-" TODO: methods, classes, consts, file, interfaces, traits
+" TODO: methods, classes, consts, file, interfaces, traits, vars
 " TODO: Editable templates for each doc block type
 " TODO: Tab to descriptions
 " TODO: Make a :PHPDoc command that can be run or mapped 
@@ -84,6 +84,7 @@ endfunction
 " TODO: Look for method calls (current class only)? - if has docblock with
 " return type, use that (must be the only return) (if all returns type is
 " knowable and diffrerent, could use mixed as type)
+" TODO: If return value is a variable, trace it back to determine type
 " Returns a single DocBlock line: @return <type>
 function! s:parseFunctionReturn(codeBlock)
     " Match a return keyword at the start of a line (must be 1 return only)

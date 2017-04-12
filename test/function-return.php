@@ -13,16 +13,6 @@ class Test {
         }
     }
 
-    /**
-     *
-     * testNestedThrow
-     *
-     * @param $test
-     * @throws \HttpException
-     * @throws \Exception
-     * @throws \LogicException
-     * @return float
-     */
     public function testNestedThrow($test)
     {
         try {
