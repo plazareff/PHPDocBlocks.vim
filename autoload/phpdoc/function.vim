@@ -2,7 +2,7 @@
 function! phpdoc#function#parse(codeBlock)
 
     " Get the indentation level from the first line
-    let l:indent = matchstr(a:codeBlock, '\v^\s+')
+    let l:indent = matchstr(a:codeBlock, '\v^\s*')
 
     " Remove escaped quotes
     let l:codeBlock = substitute(a:codeBlock, '\v\\"|\\''', "", "g")
@@ -61,10 +61,9 @@ function! s:parseFunctionReturn(codeBlock)
         " Get the return statement value including syntax
         let l:returnValue = matchlist(a:codeBlock, '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]')
         let l:returnType = s:getPhpType(l:returnValue[1])
-    else
-        let l:returnType = ""
+        return " * @return ".l:returnType
     endif
-    return " * @return ".l:returnType
+    return ""
 endfunction
 
 " Returns a list of @throws DocBlock lines

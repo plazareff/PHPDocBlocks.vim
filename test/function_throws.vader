@@ -1,0 +1,92 @@
+Given (Throws statement):
+  public function test()
+  {
+      throws new \LogicException("message");
+  }
+
+Execute:
+  call phpdoc#insert()
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \LogicException
+   */
+  public function test()
+  {
+      throws new \LogicException("message");
+  }
+
+======================================================
+
+Given (Catch block with standard whitespace):
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      } catch(\HttpException $var) {
+      }
+  }
+
+Execute:
+  call phpdoc#insert()
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \HttpException
+   */
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      } catch(\HttpException $var) {
+      }
+  }
+
+======================================================
+
+Given (Catch block with white space and new lines):
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      }
+      catch
+          (
+
+              \Exception
+              $var
+      )
+      {
+      }
+  }
+
+Execute:
+  call phpdoc#insert()
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \Exception
+   */
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      }
+      catch
+          (
+
+              \Exception
+              $var
+      )
+      {
+      }
+  }

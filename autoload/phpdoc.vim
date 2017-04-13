@@ -14,7 +14,7 @@ function! phpdoc#insert()
     let l:cursorLineNum = line('.')
 
     " Default error
-    let l:phpDoc = ['error', 'Can''t find anything to document. (Move cursor to line with keyword)']
+    let l:phpDoc = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
 
     " Function
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
@@ -62,7 +62,12 @@ function! s:getCodeBlock(type)
         let l:lineContent = getline(l:lineNum)
         let l:bracePosOnLine = matchstrpos(l:lineContent, '\v\{', 0)
         " Move cursor to the end of the block
-        execute "normal! ".l:lineNum."G0".l:bracePosOnLine[1]."l%"
+        if l:bracePosOnLine[1] == 0
+            let l:moveCursorLeft = ""
+        else
+            let l:moveCursorLeft = l:bracePosOnLine[1]."l"
+        endif
+        execute "normal! ".l:lineNum."G0".l:moveCursorLeft."%"
     else
         " Move cursor to the end of the block
         execute "normal! /{\<cr>%"
@@ -76,6 +81,6 @@ function! s:getCodeBlock(type)
 
     " Return the code block as a string
     return join(getline(l:blockStart, l:blockEnd), "\n")
-    "call append((l:blockStart-1), getline(l:blockStart, l:blockEnd))
+    "call append((l:blockStart-1), getline(l:blockStart, l:blockEnd)+l:bracePosOnLine)
 
 endfunction
