@@ -1,4 +1,3 @@
-
 " Return a list of lines that make up the doc block
 function! phpdoc#function#parse(codeBlock)
 
