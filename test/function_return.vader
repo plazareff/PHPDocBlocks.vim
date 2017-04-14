@@ -1,0 +1,324 @@
+" TODO: Multiple returns
+" TODO: A few other tests
+
+======================================================
+
+Given (Return string - single quotes):
+  public function test()
+  {
+      return 'test\'test";)(}{';
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+      return 'test\'test";)(}{';
+  }
+======================================================
+
+Given (Return string - double quotes):
+  public function test()
+  {
+      return "test\"test';)(}{";
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+      return "test\"test';)(}{";
+  }
+
+======================================================
+
+Given (Return integer - unsigned):
+  public function test()
+  {
+      return 74348378437473473;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return int
+   */
+  public function test()
+  {
+      return 74348378437473473;
+  }
+
+======================================================
+
+Given (Return integer - positive):
+  public function test()
+  {
+      return +6;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return int
+   */
+  public function test()
+  {
+      return +6;
+  }
+
+======================================================
+
+Given (Return integer - negative):
+  public function test()
+  {
+      return -38748343473748373473847384;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return int
+   */
+  public function test()
+  {
+      return -38748343473748373473847384;
+  }
+
+
+======================================================
+
+Given (Return float - unsigned):
+  public function test()
+  {
+      return 74348378.437473473;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return float
+   */
+  public function test()
+  {
+      return 74348378.437473473;
+  }
+
+======================================================
+
+Given (Return float - positive):
+  public function test()
+  {
+      return +6.6;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return float
+   */
+  public function test()
+  {
+      return +6.6;
+  }
+
+======================================================
+
+Given (Return float - negative):
+  public function test()
+  {
+      return -387483434737.48373473847384;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return float
+   */
+  public function test()
+  {
+      return -387483434737.48373473847384;
+  }
+
+======================================================
+
+Given (Return boolean - true - lowercase):
+  public function test()
+  {
+      return true;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return bool
+   */
+  public function test()
+  {
+      return true;
+  }
+
+======================================================
+
+Given (Return boolean - false - lowercase):
+  public function test()
+  {
+      return false;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return bool
+   */
+  public function test()
+  {
+      return false;
+  }
+
+======================================================
+
+Given (Return boolean - true - mixed-case):
+  public function test()
+  {
+      return TrUE;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return bool
+   */
+  public function test()
+  {
+      return TrUE;
+  }
+
+======================================================
+
+Given (Return boolean - false - mixed-case):
+  public function test()
+  {
+      return fAlSe;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return bool
+   */
+  public function test()
+  {
+      return fAlSe;
+  }
+
+======================================================
+
+Given (Return array - array()):
+  public function test()
+  {
+      return array("test",'test');
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return array
+   */
+  public function test()
+  {
+      return array("test",'test');
+  }
+
+======================================================
+
+Given (Return array - array []):
+  public function test()
+  {
+      return ["test", 'test'];
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return array
+   */
+  public function test()
+  {
+      return ["test", 'test'];
+  }

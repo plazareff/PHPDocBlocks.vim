@@ -66,38 +66,50 @@ function! s:parseFunctionReturn(codeBlock)
     return ""
 endfunction
 
+" TODO: In order of appearance for @throws
 " Returns a list of @throws DocBlock lines
 function! s:parseFunctionThrows(codeBlock)
 
-    " Nested 'throw new' exception name will be used instead of the exception name in the parent catch
     " Match catch(Exception $var), capture exception name
-    let l:catchRegex = '\v\}%(\s|\n)*catch%(\s|\n)*\(%(\s|\n)*(.{-})%(\s|\n)+[\$].{-}%(\s|\n)*\)%(\s|\n)*\{'
+    let l:catchRegex = '\v\}%(\s|\n)*catch%(\s|\n)*\(%(\s|\n)*([\\]{0,1}%(\w|\d)+)%(\s|\n)+[\$]%(\w|\d)+%(\s|\n)*\)%(\s|\n)*[{]'
 
     " Match throw new statement, capture the exception name
-    let l:throwNewRegex = '\vthrow%(\s|\n)+new%(\s|\n)+(\\\u.{-}|\u.{-})%(\s|\n)*\(.{-}\)%(\s|\n)*[;]'
+    let l:throwRegex = '\vthrow%(\s|\n)+new%(\s|\n)+(\\\u.{-}|\u.{-})%(\s|\n)*\(.{-}\)%(\s|\n)*[;]'
 
-    let l:exceptionSyntaxes = [l:catchRegex.'.{-}'.l:throwNewRegex.'.{-}\}',
-                              \l:catchRegex,
-                              \l:throwNewRegex]
+    " Match throw statements nested inside catch blocks
+    " Limitation: Only matches whitespace / newlines between the catch block
+    " declaration and the throw statement
+    let l:nestedThrowRegex = l:catchRegex.'%(\s|\n)*'.l:throwRegex
+
+    let l:exceptionSyntaxes = [l:nestedThrowRegex, l:catchRegex, l:throwRegex]
     let l:throws = []
-    let l:matchPos = ["",0,0]
+    let l:nestedThrowCode = []
+    let l:matchPosition = ["",0,0]
     let l:codeBlock = a:codeBlock
     for regex in l:exceptionSyntaxes
         while 1
             " Start matching from the end of the last match
-            let l:matchPos = matchstrpos(l:codeBlock, regex, l:matchPos[2])
-            let l:captureGroups = matchlist(l:matchPos[0], regex)
-            if len(l:captureGroups) > 2 && l:captureGroups[2] != ""
-                " Remove whole match from codeblock so we don't get duplicates
-                let l:codeBlock = substitute(l:codeBlock, regex, "", "")
-                let l:captureGroups[1] = l:captureGroups[2]
+            let l:matchPosition = matchstrpos(l:codeBlock, regex, l:matchPosition[2])
+            let l:exceptionNames = matchlist(l:matchPosition[0], regex)
+            if len(l:exceptionNames) > 2 && l:exceptionNames[2] != ""
+                call add(l:nestedThrowCode, l:exceptionNames[0])
+                " Use the nested throw exception name
+                let l:exceptionNames[1] = l:exceptionNames[2]
             endif
-            if l:matchPos[2] != -1
-                call add(l:throws, " * @throws ".l:captureGroups[1])
+            if l:matchPosition[2] != -1
+                call add(l:throws, " * @throws ".l:exceptionNames[1])
                 continue
             endif
             break
         endwhile
+        " Prevent duplicate exceptions from being found
+        if len(l:nestedThrowCode) > 0
+            for nestedThrowCode in l:nestedThrowCode
+                let nestedThrowCode = substitute(nestedThrowCode, '\\', '\\\\', "g")
+                let l:codeBlock = substitute(l:codeBlock, '\M'.nestedThrowCode, "", "")
+            endfor
+            let l:nestedThrowCode = []
+        endif
     endfor
 
     return l:throws

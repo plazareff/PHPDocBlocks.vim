@@ -8,7 +8,7 @@
 " has to be mixed??
 
 " Inserts a doc block above the current cursor line
-function! phpdoc#insert()
+function! phpdoc#insert(...)
 
     let l:cursorLineContent = getline('.')
     let l:cursorLineNum = line('.')
@@ -23,7 +23,14 @@ function! phpdoc#insert()
     endif
 
     if l:phpDoc[0] == 'error'
-        execute "echohl Error | echon 'PHPDoc: '.l:phpDoc[1] | echohl Normal"
+        " Errors while testing need to be output to the buffer
+        if a:0 > 0 && a:1 == "test"
+            call append((l:cursorLineNum-1), "====== ERROR ======")
+            call append((l:cursorLineNum), l:phpDoc[1])
+            call append((l:cursorLineNum+1), "===================")
+        else
+             execute "echohl Error | echon 'PHPDoc: '.l:phpDoc[1] | echohl Normal"
+        endif
     elseif len(l:phpDoc) > 0
         call append((l:cursorLineNum-1), l:phpDoc)
     endif

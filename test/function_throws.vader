@@ -1,11 +1,15 @@
-Given (Throws statement):
+" TODO: Test order of throw statements (in order of appearance) (would have to update all the tests)
+
+======================================================
+
+Given (Throw statement):
   public function test()
   {
-      throws new \LogicException("message");
+      throw new \LogicException("message");
   }
 
 Execute:
-  call phpdoc#insert()
+  call phpdoc#insert("test")
 
 Expect:
   /**
@@ -16,12 +20,49 @@ Expect:
    */
   public function test()
   {
-      throws new \LogicException("message");
+      throw new \LogicException("message");
   }
 
 ======================================================
 
-Given (Catch block with standard whitespace):
+Given (Multiple throw statements):
+  public function test()
+  {
+      if($logic) {
+        throw new \LogicException("message");
+      } elseif($http) {
+        throw new \HttpException("message");
+      } else {
+        throw new \Exception("message");
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \LogicException
+   * @throws \HttpException
+   * @throws \Exception
+   */
+  public function test()
+  {
+      if($logic) {
+        throw new \LogicException("message");
+      } elseif($http) {
+        throw new \HttpException("message");
+      } else {
+        throw new \Exception("message");
+      }
+  }
+
+======================================================
+
+Given (Catch block):
   public function test()
   {
       try {
@@ -31,7 +72,7 @@ Given (Catch block with standard whitespace):
   }
 
 Execute:
-  call phpdoc#insert()
+  call phpdoc#insert("test")
 
 Expect:
   /**
@@ -50,24 +91,208 @@ Expect:
 
 ======================================================
 
-Given (Catch block with white space and new lines):
+Given (Multiple catch blocks):
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      } catch(\HttpException $var) {
+      }
+      try {
+          $somevar = "test";
+      } catch(\LogicException $var) {
+      }
+      try {
+          $somevar = "test";
+      } catch(\Exception $var) {
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \HttpException
+   * @throws \LogicException
+   * @throws \Exception
+   */
+  public function test()
+  {
+      try {
+          $somevar = "test";
+      } catch(\HttpException $var) {
+      }
+      try {
+          $somevar = "test";
+      } catch(\LogicException $var) {
+      }
+      try {
+          $somevar = "test";
+      } catch(\Exception $var) {
+      }
+  }
+
+======================================================
+
+Given (Nested throw in a catch block):
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+        throw new \LogicException("message");
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \LogicException
+   */
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+        throw new \LogicException("message");
+      }
+  }
+
+======================================================
+
+Given (Nested throws in mutliple catch blocks):
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \TestException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \HttpException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \NewException("message");
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \TestException
+   * @throws \HttpException
+   * @throws \NewException
+   */
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \TestException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \HttpException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \NewException("message");
+      }
+  }
+
+======================================================
+
+Given (NO BACKSLASHES: Nested throws in mutliple catch blocks):
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new TestException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new HttpException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new NewException("message");
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws TestException
+   * @throws HttpException
+   * @throws NewException
+   */
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new TestException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new HttpException("message");
+      }
+      try {
+          $testvar = "test";
+      } catch(Exception $var) {
+          throw new NewException("message");
+      }
+  }
+
+======================================================
+
+Given (Catch block with whitespace):
   public function test()
   {
       try {
           $somevar = "test";
       }
-      catch
-          (
+      catch  
+          (  
 
-              \Exception
-              $var
-      )
-      {
+              \Exception  
+              $var  
+      )  
+      {  
       }
   }
 
 Execute:
-  call phpdoc#insert()
+  call phpdoc#insert("test")
 
 Expect:
   /**
@@ -81,12 +306,233 @@ Expect:
       try {
           $somevar = "test";
       }
-      catch
-          (
+      catch  
+          (  
 
-              \Exception
-              $var
-      )
-      {
+              \Exception  
+              $var  
+      )  
+      {  
       }
+  }
+
+======================================================
+
+Given (Throw statement with whitespace):
+  public function test()
+  {
+      throw  
+
+      new  
+
+      \LogicException(  
+
+        "message"  
+
+      )  
+
+      ;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \LogicException
+   */
+  public function test()
+  {
+      throw  
+
+      new  
+
+      \LogicException(  
+
+        "message"  
+
+      )  
+
+      ;
+  }
+
+======================================================
+
+Given (Nested throw in a catch block with whitespace):
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      }   
+      catch(
+
+            \Exception
+
+            $var
+
+      )
+
+      {
+
+        throw 
+
+        new
+
+           \LogicException("message")
+
+        ;
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \LogicException
+   */
+  public function test()
+  {
+      try {
+          $testvar = "test";
+      }   
+      catch(
+
+            \Exception
+
+            $var
+
+      )
+
+      {
+
+        throw 
+
+        new
+
+           \LogicException("message")
+
+        ;
+      }
+  }
+
+======================================================
+
+Given (Multiple Catch blocks, Throw statements and nested throw statements):
+  public function test()
+  {
+
+      try {
+          $testvar = "test";
+      } catch(\Catch1Exception $var) {
+          
+      }
+
+      throw new \Throw1Exception("message");
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested1Exception("message");
+      }
+
+      throw new \Throw2Exception("message");
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested2Exception("message");
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Catch2Exception $var) {
+          
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested3Exception("message");
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Catch3Exception $var) {
+          
+      }
+
+      throw new \Throw3Exception("message");
+
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @throws \Nested1Exception
+   * @throws \Nested2Exception
+   * @throws \Nested3Exception
+   * @throws \Catch1Exception
+   * @throws \Catch2Exception
+   * @throws \Catch3Exception
+   * @throws \Throw1Exception
+   * @throws \Throw2Exception
+   * @throws \Throw3Exception
+   */
+  public function test()
+  {
+
+      try {
+          $testvar = "test";
+      } catch(\Catch1Exception $var) {
+          
+      }
+
+      throw new \Throw1Exception("message");
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested1Exception("message");
+      }
+
+      throw new \Throw2Exception("message");
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested2Exception("message");
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Catch2Exception $var) {
+          
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Exception $var) {
+          throw new \Nested3Exception("message");
+      }
+
+      try {
+          $testvar = "test";
+      } catch(\Catch3Exception $var) {
+          
+      }
+
+      throw new \Throw3Exception("message");
+
   }
