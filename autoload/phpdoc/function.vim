@@ -4,14 +4,8 @@ function! phpdoc#function#parse(codeBlock)
     " Get the indentation level from the first line
     let l:indent = matchstr(a:codeBlock, '\v^\s*')
 
-    " Remove escaped quotes
-    let l:codeBlock = substitute(a:codeBlock, '\v\\"|\\''', "", "g")
-
-    " Remove everything in strings for the whole code block (to remove semicolons in strings)
-    let l:codeBlock = substitute(l:codeBlock, '\v".{-}"|''.{-}''', "\"\"", "g")
-
     " Match a valid function syntax, capture the name and parameters
-    let l:nameAndParams = matchlist(l:codeBlock, '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*\{')
+    let l:nameAndParams = matchlist(a:codeBlock, '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*\{')
     if l:nameAndParams == []
         return ['error','No function name detected']
     endif
@@ -20,10 +14,10 @@ function! phpdoc#function#parse(codeBlock)
     let l:params = s:parseFunctionParams(l:nameAndParams[2])
 
     " @throws
-    let l:throws = s:parseFunctionThrows(l:codeBlock)
+    let l:throws = s:parseFunctionThrows(a:codeBlock)
 
     " @return
-    let l:return = s:parseFunctionReturn(l:codeBlock)
+    let l:return = s:parseFunctionReturn(a:codeBlock)
 
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDoc = ['/**',

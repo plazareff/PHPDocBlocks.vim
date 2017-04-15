@@ -1,0 +1,22 @@
+" TODO:
+
+======================================================
+
+Given (Parameter - default - string):
+  public function test($test = "fu'nction\" name()}{")
+  {
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @param string $test
+   */
+  public function test($test = "fu'nction\" name()}{")
+  {
+  }

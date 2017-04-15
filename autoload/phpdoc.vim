@@ -18,7 +18,7 @@ function! phpdoc#insert(...)
 
     " Function
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
-        let l:codeBlock = s:getCodeBlock("function")
+        let l:codeBlock = s:codeBlockWithoutStringContent()
         let l:phpDoc = phpdoc#function#parse(l:codeBlock)
     endif
 
@@ -38,58 +38,44 @@ function! phpdoc#insert(...)
 endfunction
 
 
-" Get the code block
-function! s:getCodeBlock(type)
+" Return the code block as a string
+" TODO: Multi-line strings?
+function! s:codeBlockWithoutStringContent()
 
-    " Get the starting line number
-    let l:blockStart = line('.')
+    let l:codeBlock = ""
+    let l:depth = 0
+    let l:lineNumber = line('.')
+    let l:totalLinesInDocument = line('$')
 
-    " For functions we need to be sure we are not matching inside default
-    " parameter strings - ex: $param = ") {" could falsely match the start of
-    " a block.
-    " TODO: Multi-line strings?
-    " FIXME: % between { and } doesn't skip past } in single quotes
-    "        May have to go line by line to find the real matching }
-    if a:type == "function"
-        let l:lineNum = l:blockStart
-        let l:i = 0
-        while l:i < 10
-            let l:i += 1
-            let l:lineContent = getline(l:lineNum)
-            " Remove escaped quotes
-            let l:lineContent = substitute(l:lineContent, '\v\\"|\\''', "", "g")
-            " Remove string contents
-            let l:lineContent = substitute(l:lineContent, '\v".{-}"|''.{-}''', "\"\"", "g")
-            " Find the real opening brace
-            let l:matchBrace = matchstr(l:lineContent, '\v\{')
-            if l:matchBrace == ""
-                let l:lineNum += 1
-                continue
-            endif
-            break
-        endwhile
-        let l:lineContent = getline(l:lineNum)
-        let l:bracePosOnLine = matchstrpos(l:lineContent, '\v\{', 0)
-        " Move cursor to the end of the block
-        if l:bracePosOnLine[1] == 0
-            let l:moveCursorLeft = ""
-        else
-            let l:moveCursorLeft = l:bracePosOnLine[1]."l"
+    while l:lineNumber <= l:totalLinesInDocument
+        let l:line = getline(l:lineNumber)
+        let l:line = s:removeStringContent(l:line)
+        let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
+        if l:openingBraceCount > 0
+            let l:depth += l:openingBraceCount
         endif
-        execute "normal! ".l:lineNum."G0".l:moveCursorLeft."%"
-    else
-        " Move cursor to the end of the block
-        execute "normal! /{\<cr>%"
-    endif
+        let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
+        if l:closingBraceCount > 0
+            let l:depth -= l:closingBraceCount
+        endif
+        let l:codeBlock .= l:line."\n"
+        if l:depth == 0 && l:closingBraceCount > 0
+            break
+        endif
+        let l:lineNumber += 1
+    endwhile
 
-    " Get the last line number
-    let l:blockEnd = line('.')
+    return l:codeBlock
 
-    " Move the cursor back to the start of the first line
-    execute "normal! ".l:blockStart."G"
+endfunction
 
-    " Return the code block as a string
-    return join(getline(l:blockStart, l:blockEnd), "\n")
-    "call append((l:blockStart-1), getline(l:blockStart, l:blockEnd))
 
+function! s:removeEscapedQuotes(string)
+    return substitute(a:string, '\v\\"|\\''', "", "g")
+endfunction
+
+
+function! s:removeStringContent(string)
+    let l:string = s:removeEscapedQuotes(a:string)
+    return substitute(l:string, '\v".{-}"|''.{-}''', "\"\"", "g")
 endfunction

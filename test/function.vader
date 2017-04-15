@@ -1,0 +1,124 @@
+" TODO:
+
+======================================================
+
+Given (Function - basic):
+  public function test()
+  {
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   */
+  public function test()
+  {
+  }
+
+======================================================
+
+Given (Function - nested braces):
+  public function test()
+  {
+      if($test) {
+          $test = "test";
+      } else {
+          $test = "test2";
+      }
+      return "test";
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+      if($test) {
+          $test = "test";
+      } else {
+          $test = "test2";
+      }
+      return "test";
+  }
+
+======================================================
+
+Given (Function - multiple function blocks):
+  public function firstFunction()
+  {
+      return "string";
+  }
+  
+  public function secondFunction()
+  {
+      return 8;
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * firstFunction
+   *
+   * @return string
+   */
+  public function firstFunction()
+  {
+      return "string";
+  }
+  
+  public function secondFunction()
+  {
+      return 8;
+  }
+
+======================================================
+
+Given (Function - multiple nested blocks - over multiple lines):
+  public function test()
+  {
+      if($test) {
+          if($test) {
+              $test = "test";
+          }
+      } else {
+          $test = "test2";
+      }
+      return "test";
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+      if($test) {
+          if($test) {
+              $test = "test";
+          }
+      } else {
+          $test = "test2";
+      }
+      return "test";
+  }

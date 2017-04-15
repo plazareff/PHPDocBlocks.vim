@@ -1,12 +1,12 @@
 " TODO: Multiple returns
 " TODO: A few other tests
 
-====================================================== return 'test\'test";)(}{';
+======================================================
 
 Given (Return string - single quotes):
   public function test()
   {
-      return 'test\'test";)}';
+      return 'test\'test";)(}{';
   }
 
 Execute:
@@ -23,6 +23,7 @@ Expect:
   {
       return 'test\'test";)(}{';
   }
+
 ======================================================
 
 Given (Return string - double quotes):
