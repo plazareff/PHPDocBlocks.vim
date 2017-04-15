@@ -60,7 +60,9 @@ function! s:parseFunctionReturn(codeBlock)
     if l:numOfReturns == 1
         " Get the return statement value including syntax
         let l:returnValue = matchlist(a:codeBlock, '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]')
-        let l:returnType = s:getPhpType(l:returnValue[1])
+        " FIXME: duplicated code for removing commas and quotes in arrays
+        let l:returnValue = substitute(l:returnValue[1], '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
+        let l:returnType = s:getPhpType(l:returnValue)
         return " * @return ".l:returnType
     endif
     return ""

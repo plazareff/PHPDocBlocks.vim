@@ -48,6 +48,8 @@ function! s:getCodeBlock(type)
     " parameter strings - ex: $param = ") {" could falsely match the start of
     " a block.
     " TODO: Multi-line strings?
+    " FIXME: % between { and } doesn't skip past } in single quotes
+    "        May have to go line by line to find the real matching }
     if a:type == "function"
         let l:lineNum = l:blockStart
         let l:i = 0
@@ -88,6 +90,6 @@ function! s:getCodeBlock(type)
 
     " Return the code block as a string
     return join(getline(l:blockStart, l:blockEnd), "\n")
-    "call append((l:blockStart-1), getline(l:blockStart, l:blockEnd)+l:bracePosOnLine)
+    "call append((l:blockStart-1), getline(l:blockStart, l:blockEnd))
 
 endfunction
