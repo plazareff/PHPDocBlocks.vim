@@ -3,6 +3,147 @@
 
 ======================================================
 
+"Given (Return multiple - strings - variable type):
+  "public function test()
+  "{
+      "$testString = "test\"test';)(}{";
+      "if($test) {
+          "return "test\"test';)(}{";
+      "} elseif($test === "test") {
+          "return "test\"test';)(}{";
+      "} else {
+          "return $testString;
+      "}
+  "}
+
+"Execute:
+  "call phpdoc#insert("test")
+
+"Expect:
+  "/**
+   "*
+   "* test
+   "*
+   "* @return string
+   "*/
+  "public function test()
+  "{
+      "$testString = "test\"test';)(}{";
+      "if($test) {
+          "return "test\"test';)(}{";
+      "} elseif($test === "test") {
+          "return "test\"test';)(}{";
+      "} else {
+          "return $testString;
+      "}
+  "}
+
+======================================================
+
+Given (Return multiple - string|int - two int returns):
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return 7346734;
+      } else {
+          return 7346734;
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string|int
+   */
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return 7346734;
+      } else {
+          return 7346734;
+      }
+  }
+======================================================
+
+Given (Return multiple - string|int|array):
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return 7346734;
+      } else {
+          return ["item1","item2","item3"];
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string|int|array
+   */
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return 7346734;
+      } else {
+          return ["item1","item2","item3"];
+      }
+  }
+
+======================================================
+
+Given (Return multiple - strings):
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return "test\"test';)(}{";
+      } else {
+          return "test\"test';)(}{";
+      }
+  }
+
+Execute:
+  call phpdoc#insert("test")
+
+Expect:
+  /**
+   *
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+      if($test) {
+          return "test\"test';)(}{";
+      } elseif($test === "test") {
+          return "test\"test';)(}{";
+      } else {
+          return "test\"test';)(}{";
+      }
+  }
+
+======================================================
+
 Given (Return string - single quotes):
   public function test()
   {

@@ -40,27 +40,59 @@ function! phpdoc#function#parse(codeBlock)
 
 endfunction
 
+
 " TODO: A return in a catch block shouldn't be documented as @return?
-" TODO: Test multiple return statements, if same types for all, use that
-" type, if EXPLICITLY diff types, use mixed
-" TODO: Look for method calls (current class only)? - if has docblock with
-" return type, use that (must be the only return) (if all returns type is
-" knowable and diffrerent, could use mixed as type)
-" TODO: If return value is a variable, trace it back to determine type
 " Returns a single DocBlock line: @return <type>
 function! s:parseFunctionReturn(codeBlock)
-    " Match a return keyword at the start of a line (must be 1 return only)
-    let l:numOfReturns = len(split(a:codeBlock, '\vreturn%(\s|\n)+[^;]+[;]')) - 1
-    if l:numOfReturns == 1
-        " Get the return statement value including syntax
-        let l:returnValue = matchlist(a:codeBlock, '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]')
-        " FIXME: duplicated code for removing commas and quotes in arrays
-        let l:returnValue = substitute(l:returnValue[1], '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
-        let l:returnType = s:getPhpType(l:returnValue)
-        return " * @return ".l:returnType
+
+    let l:codeBlock = s:removeArrayContents(a:codeBlock)
+
+    let l:matchPosition = ["",0,0]
+    let l:returnRegex = '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]'
+    let l:returnTypes = []
+    while 1
+        " Start matching from the end of the last match
+        let l:matchPosition = matchstrpos(l:codeBlock, l:returnRegex, l:matchPosition[2])
+        if l:matchPosition[2] != -1
+            let l:returnValue = matchlist(l:matchPosition[0], l:returnRegex)
+            if len(l:returnValue) > 1
+                let l:returnType = s:getPhpType(l:returnValue[1])
+            endif
+            call add(l:returnTypes, l:returnType)
+            continue
+        endif
+        break
+    endwhile
+
+    let l:sameReturnTypes = 1
+    for l:rt in l:returnTypes
+        if l:rt != l:returnTypes[0]
+            let l:sameReturnTypes = 0
+        endif
+    endfor
+
+    let l:explicitlyNotSameReturnTypes = 1
+    for l:rt in l:returnTypes
+        if l:rt == ""
+            let l:explicitlyNotSameReturnTypes = 0
+        endif
+    endfor
+
+    if l:sameReturnTypes
+        let l:returnType = l:returnTypes[0]
+    elseif l:explicitlyNotSameReturnTypes
+        " TODO: remove duplicates
+        let l:returnType = ""
+        for l:rt in l:returnTypes
+            let l:returnType .= l:rt."|"
+        endfor
+        let l:returnType = substitute(l:returnType, '\v\|$', "", "")
     endif
-    return ""
+
+    return " * @return ".l:returnType
+
 endfunction
+
 
 " TODO: In order of appearance for @throws
 " Returns a list of @throws DocBlock lines
@@ -112,14 +144,14 @@ function! s:parseFunctionThrows(codeBlock)
 
 endfunction
 
-" Returns a list of @param DocBlock lines
-function! s:parseFunctionParams(parameterString)
 
-    " Remove everything from PHP arrays (removes commas)
-    let l:paramsString = substitute(a:parameterString, '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
+" Returns a list of @param DocBlock lines
+function! s:parseFunctionParams(parameters)
+
+    let l:parameters = s:removeArrayContents(a:parameters)
 
     " Transform each parameter into a line to be used as a doc block
-    let l:paramsList = split(l:paramsString, ",")
+    let l:paramsList = split(l:parameters, ",")
     let l:x = 0
     for i in l:paramsList
         " Convert all whitespace and new lines to a single space globally
@@ -155,6 +187,7 @@ function! s:parseFunctionParams(parameterString)
 
 endfunction
 
+
 " Return PHP type based on the syntax of a string
 function! s:getPhpType(syntax)
     " Starts with ' or " (string)
@@ -174,4 +207,9 @@ function! s:getPhpType(syntax)
         return "array"
     endif
     return ""
+endfunction
+
+
+function! s:removeArrayContents(string)
+    return substitute(a:string, '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
 endfunction
