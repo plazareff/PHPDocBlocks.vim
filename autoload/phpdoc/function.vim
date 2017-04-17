@@ -50,46 +50,53 @@ function! s:parseFunctionReturn(codeBlock)
     let l:matchPosition = ["",0,0]
     let l:returnRegex = '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]'
     let l:returnTypes = []
-    while 1
-        " Start matching from the end of the last match
-        let l:matchPosition = matchstrpos(l:codeBlock, l:returnRegex, l:matchPosition[2])
-        if l:matchPosition[2] != -1
-            let l:returnValue = matchlist(l:matchPosition[0], l:returnRegex)
-            if len(l:returnValue) > 1
-                let l:returnType = s:getPhpType(l:returnValue[1])
+
+    if matchstr(l:codeBlock, l:returnRegex) != ""
+
+        while 1
+            " Start matching from the end of the last match
+            let l:matchPosition = matchstrpos(l:codeBlock, l:returnRegex, l:matchPosition[2])
+            if l:matchPosition[2] != -1
+                let l:returnValue = matchlist(l:matchPosition[0], l:returnRegex)
+                if len(l:returnValue) > 1
+                    let l:returnType = s:getPhpType(l:returnValue[1])
+                endif
+                call add(l:returnTypes, l:returnType)
+                continue
             endif
-            call add(l:returnTypes, l:returnType)
-            continue
-        endif
-        break
-    endwhile
+            break
+        endwhile
 
-    let l:sameReturnTypes = 1
-    for l:rt in l:returnTypes
-        if l:rt != l:returnTypes[0]
-            let l:sameReturnTypes = 0
-        endif
-    endfor
-
-    let l:explicitlyNotSameReturnTypes = 1
-    for l:rt in l:returnTypes
-        if l:rt == ""
-            let l:explicitlyNotSameReturnTypes = 0
-        endif
-    endfor
-
-    if l:sameReturnTypes
-        let l:returnType = l:returnTypes[0]
-    elseif l:explicitlyNotSameReturnTypes
-        " TODO: remove duplicates
-        let l:returnType = ""
+        let l:sameReturnTypes = 1
         for l:rt in l:returnTypes
-            let l:returnType .= l:rt."|"
+            if l:rt != l:returnTypes[0]
+                let l:sameReturnTypes = 0
+            endif
         endfor
-        let l:returnType = substitute(l:returnType, '\v\|$', "", "")
+
+        let l:explicitlyNotSameReturnTypes = 1
+        for l:rt in l:returnTypes
+            if l:rt == ""
+                let l:explicitlyNotSameReturnTypes = 0
+            endif
+        endfor
+
+        if l:sameReturnTypes
+            let l:returnType = l:returnTypes[0]
+        elseif l:explicitlyNotSameReturnTypes
+            let l:uniqueReturnTypes = s:removeDuplicateListElements(l:returnTypes)
+            let l:returnType = ""
+            for l:rt in l:uniqueReturnTypes
+                let l:returnType .= l:rt."|"
+            endfor
+            let l:returnType = substitute(l:returnType, '\v\|$', "", "")
+        endif
+
+        return " * @return ".l:returnType
+
     endif
 
-    return " * @return ".l:returnType
+    return ""
 
 endfunction
 
@@ -212,4 +219,28 @@ endfunction
 
 function! s:removeArrayContents(string)
     return substitute(a:string, '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
+endfunction
+
+
+function! s:removeDuplicateListElements(list)
+
+    let l:uniqueList = []
+    for l:listElement in a:list
+
+        let l:inUniqueList = 0
+        for l:uniqueListElement in l:uniqueList
+            if l:listElement == l:uniqueListElement
+                let l:inUniqueList = 1
+                break
+            endif
+        endfor
+
+        if !l:inUniqueList
+            call add(l:uniqueList, l:listElement)
+        endif
+
+    endfor
+
+    return l:uniqueList
+
 endfunction
