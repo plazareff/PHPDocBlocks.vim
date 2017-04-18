@@ -25,7 +25,6 @@ function! phpdocblocks#function#parse(codeBlock)
 
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDocBlock = ["/**",
-                   \" *",
                    \" * ".l:name,
                    \" *"] + l:param + l:throws
     if l:return != ""
@@ -100,7 +99,7 @@ function! s:parseFunctionReturn(codeBlock)
 
     endif
 
-    return ""
+    return " * @return void"
 
 endfunction
 
@@ -190,7 +189,7 @@ function! s:parseFunctionParameters(parameters)
                 let i = "mixed ".i
             endif
         endif
-        let l:paramsList[l:x] = " * @param ".i
+        let l:paramsList[l:x] = " * @param  ".i
         let l:x += 1
     endfor
 

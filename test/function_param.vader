@@ -12,10 +12,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
-   * @param string $test
+   * @param  string $test
+   * @return void
    */
   public function test($test = "fu'nction\" name()}{")
   {

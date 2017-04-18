@@ -2,7 +2,7 @@
 
 ======================================================
 
-Given (Function - basic):
+Given (Procedure - no return):
   public function test()
   {
   }
@@ -12,9 +12,9 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
+   * @return void
    */
   public function test()
   {
@@ -38,7 +38,6 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @return string
@@ -71,7 +70,6 @@ Execute:
 
 Expect:
   /**
-   *
    * firstFunction
    *
    * @return string
@@ -106,7 +104,6 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @return string

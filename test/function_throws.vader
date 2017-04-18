@@ -13,10 +13,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \LogicException
+   * @return void
    */
   public function test()
   {
@@ -42,12 +42,12 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \LogicException
    * @throws \HttpException
    * @throws \Exception
+   * @return void
    */
   public function test()
   {
@@ -76,10 +76,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \HttpException
+   * @return void
    */
   public function test()
   {
@@ -113,12 +113,12 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \HttpException
    * @throws \LogicException
    * @throws \Exception
+   * @return void
    */
   public function test()
   {
@@ -153,10 +153,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \LogicException
+   * @return void
    */
   public function test()
   {
@@ -194,12 +194,12 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \TestException
    * @throws \HttpException
    * @throws \NewException
+   * @return void
    */
   public function test()
   {
@@ -247,12 +247,12 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws TestException
    * @throws HttpException
    * @throws NewException
+   * @return void
    */
   public function test()
   {
@@ -296,10 +296,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \Exception
+   * @return void
    */
   public function test()
   {
@@ -339,10 +339,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \LogicException
+   * @return void
    */
   public function test()
   {
@@ -392,10 +392,10 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \LogicException
+   * @return void
    */
   public function test()
   {
@@ -477,7 +477,6 @@ Execute:
 
 Expect:
   /**
-   *
    * test
    *
    * @throws \Nested1Exception
@@ -489,6 +488,7 @@ Expect:
    * @throws \Throw1Exception
    * @throws \Throw2Exception
    * @throws \Throw3Exception
+   * @return void
    */
   public function test()
   {
