@@ -9,7 +9,7 @@ Given (Throw statement):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -38,7 +38,7 @@ Given (Multiple throw statements):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -72,7 +72,7 @@ Given (Catch block):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -109,7 +109,7 @@ Given (Multiple catch blocks):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -149,7 +149,7 @@ Given (Nested throw in a catch block):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -190,7 +190,7 @@ Given (Nested throws in mutliple catch blocks):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -243,7 +243,7 @@ Given (NO BACKSLASHES: Nested throws in mutliple catch blocks):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -292,7 +292,7 @@ Given (Catch block with whitespace):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -335,7 +335,7 @@ Given (Throw statement with whitespace):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -388,7 +388,7 @@ Given (Nested throw in a catch block with whitespace):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -473,7 +473,7 @@ Given (Multiple Catch blocks, Throw statements and nested throw statements):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**

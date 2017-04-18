@@ -1,17 +1,21 @@
 " Return a list of lines that make up the doc block
-function! phpdoc#function#parse(codeBlock)
+function! phpdocblocks#function#parse(codeBlock)
 
     " Get the indentation level from the first line
     let l:indent = matchstr(a:codeBlock, '\v^\s*')
 
     " Match a valid function syntax, capture the name and parameters
-    let l:nameAndParams = matchlist(a:codeBlock, '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*\{')
-    if l:nameAndParams == []
-        return ['error','No function name detected']
+    let l:functionParts = matchlist(a:codeBlock, '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*\{')
+
+    if l:functionParts != []
+        let l:parameters = l:functionParts[2]
+        let l:name = l:functionParts[1]
+    else
+        return ["error","Sorry, I can't find a valid PHP function declaration on this line."]
     endif
 
     " @param
-    let l:params = s:parseFunctionParams(l:nameAndParams[2])
+    let l:param = s:parseFunctionParameters(l:parameters)
 
     " @throws
     let l:throws = s:parseFunctionThrows(a:codeBlock)
@@ -20,23 +24,23 @@ function! phpdoc#function#parse(codeBlock)
     let l:return = s:parseFunctionReturn(a:codeBlock)
 
     " Viml list of lines to append as the PHP documentaion block
-    let l:phpDoc = ['/**',
-                   \' *',
-                   \' * '.l:nameAndParams[1],
-                   \' *'] + l:params + l:throws
+    let l:phpDocBlock = ["/**",
+                   \" *",
+                   \" * ".l:name,
+                   \" *"] + l:param + l:throws
     if l:return != ""
-        call add(l:phpDoc, l:return)
+        call add(l:phpDocBlock, l:return)
     endif
-    call add(l:phpDoc, " */")
+    call add(l:phpDocBlock, " */")
 
     " Loop through each line and add the appropriate indent
     let l:x = 0
-    for i in l:phpDoc
-        let l:phpDoc[l:x] = l:indent."".l:phpDoc[l:x]
+    for i in l:phpDocBlock
+        let l:phpDocBlock[l:x] = l:indent."".l:phpDocBlock[l:x]
         let l:x += 1
     endfor
 
-    return l:phpDoc
+    return l:phpDocBlock
 
 endfunction
 
@@ -153,7 +157,7 @@ endfunction
 
 
 " Returns a list of @param DocBlock lines
-function! s:parseFunctionParams(parameters)
+function! s:parseFunctionParameters(parameters)
 
     let l:parameters = s:removeArrayContents(a:parameters)
 

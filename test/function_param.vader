@@ -8,7 +8,7 @@ Given (Parameter - default - string):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**

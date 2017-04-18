@@ -17,7 +17,7 @@
   "}
 
 "Execute:
-  "call phpdoc#insert("test")
+  "call phpdocblocks#insert("test")
 
 "Expect:
   "/**
@@ -53,7 +53,7 @@ Given (Return multiple - string|int - two int returns):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -87,7 +87,7 @@ Given (Return multiple - string|int|array):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -122,7 +122,7 @@ Given (Return multiple - strings):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -151,7 +151,7 @@ Given (Return string - single quotes):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -174,7 +174,7 @@ Given (Return string - double quotes):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -197,7 +197,7 @@ Given (Return integer - unsigned):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -220,7 +220,7 @@ Given (Return integer - positive):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -243,7 +243,7 @@ Given (Return integer - negative):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -267,7 +267,7 @@ Given (Return float - unsigned):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -290,7 +290,7 @@ Given (Return float - positive):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -313,7 +313,7 @@ Given (Return float - negative):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -336,7 +336,7 @@ Given (Return boolean - true - lowercase):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -359,7 +359,7 @@ Given (Return boolean - false - lowercase):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -382,7 +382,7 @@ Given (Return boolean - true - mixed-case):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -405,7 +405,7 @@ Given (Return boolean - false - mixed-case):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -428,7 +428,7 @@ Given (Return array - array()):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**
@@ -451,7 +451,7 @@ Given (Return array - array []):
   }
 
 Execute:
-  call phpdoc#insert("test")
+  call phpdocblocks#insert("test")
 
 Expect:
   /**

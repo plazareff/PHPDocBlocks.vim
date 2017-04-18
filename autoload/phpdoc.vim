@@ -2,37 +2,37 @@
 " TODO: methods, classes, consts, file, interfaces, traits, vars
 " TODO: Editable templates for each doc block type
 " TODO: Tab to descriptions
-" TODO: Make a :PHPDoc command that can be run or mapped 
+" TODO: Make a :PHPDocBlocks command that can be run or mapped 
 " NOTE: %(\s|\n)* = non-capturing group to match whitespace and line breaks
 " TODO: If has return statement and a throw statement in codeblock the return
 " has to be mixed??
 
 " Inserts a doc block above the current cursor line
-function! phpdoc#insert(...)
+function! phpdocblocks#insert(...)
 
     let l:cursorLineContent = getline('.')
     let l:cursorLineNum = line('.')
 
     " Default error
-    let l:phpDoc = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
+    let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
 
     " Function
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
         let l:codeBlock = s:codeBlockWithoutStringContent()
-        let l:phpDoc = phpdoc#function#parse(l:codeBlock)
+        let l:output = phpdocblocks#function#parse(l:codeBlock)
     endif
 
-    if l:phpDoc[0] == 'error'
+    if l:output[0] == 'error'
         " Errors while testing need to be output to the buffer
         if a:0 > 0 && a:1 == "test"
             call append((l:cursorLineNum-1), "====== ERROR ======")
-            call append((l:cursorLineNum), l:phpDoc[1])
+            call append((l:cursorLineNum), l:output[1])
             call append((l:cursorLineNum+1), "===================")
         else
-             execute "echohl Error | echon 'PHPDoc: '.l:phpDoc[1] | echohl Normal"
+             execute "echohl Error | echon 'PHPDocBlocks: '.l:output[1] | echohl Normal"
         endif
-    elseif len(l:phpDoc) > 0
-        call append((l:cursorLineNum-1), l:phpDoc)
+    elseif len(l:output) > 0
+        call append((l:cursorLineNum-1), l:output)
     endif
 
 endfunction
