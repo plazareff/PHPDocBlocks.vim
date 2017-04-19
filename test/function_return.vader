@@ -223,7 +223,7 @@ Expect:
 
 ======================================================
 
-Given (Return integer - positive):
+Given (Return integer - signed positive):
   public function test()
   {
       return +6;
@@ -245,7 +245,7 @@ Expect:
 
 ======================================================
 
-Given (Return integer - negative):
+Given (Return integer - signed negative):
   public function test()
   {
       return -38748343473748373473847384;
@@ -290,7 +290,7 @@ Expect:
 
 ======================================================
 
-Given (Return float - positive):
+Given (Return float - signed positive):
   public function test()
   {
       return +6.6;
@@ -312,7 +312,7 @@ Expect:
 
 ======================================================
 
-Given (Return float - negative):
+Given (Return float - signed negative):
   public function test()
   {
       return -387483434737.48373473847384;

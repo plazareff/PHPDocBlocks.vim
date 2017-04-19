@@ -27,7 +27,7 @@ function! phpdocblocks#function#parse(codeBlock)
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDocBlock = ["/**",
                    \" * ".l:name,
-                   \" *".l:functionParts[3]] + l:param + l:throws
+                   \" *"] + l:param + l:throws
     if l:return != ""
         call add(l:phpDocBlock, l:return)
     endif
@@ -170,9 +170,15 @@ function! s:parseFunctionParameters(parameters)
 
     let l:parameters = s:removeArrayContents(a:parameters)
 
+    " Empty parameter declaration?
+    if matchstr(l:parameters, '\v^%(\s|\n)*$') != ""
+        return []
+    endif
+
     " Transform each parameter into a line to be used as a doc block
     let l:paramsList = split(l:parameters, ",")
-    let l:x = 0
+
+    let l:params = []
     for i in l:paramsList
         " Convert all whitespace and new lines to a single space globally
         let i = substitute(i, '\v(\s|\n)+', " ", "g")
@@ -199,11 +205,10 @@ function! s:parseFunctionParameters(parameters)
                 let i = "mixed ".i
             endif
         endif
-        let l:paramsList[l:x] = " * @param  ".i
-        let l:x += 1
+        call add(l:params, " * @param  ".i)
     endfor
 
-    return l:paramsList
+    return l:params
 
 endfunction
 
