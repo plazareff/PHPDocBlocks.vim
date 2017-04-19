@@ -3,39 +3,55 @@
 
 ======================================================
 
-"Given (Return multiple - strings - variable type):
-  "public function test()
-  "{
-      "$testString = "test\"test';)(}{";
-      "if($test) {
-          "return "test\"test';)(}{";
-      "} elseif($test === "test") {
-          "return "test\"test';)(}{";
-      "} else {
-          "return $testString;
-      "}
-  "}
+Given (Return type defined in declaration - User object):
+  public function test(): User
+  {
+      if($test === "test") {
+          return new User;
+      }
+  }
 
-"Execute:
-  "call phpdocblocks#insert("test")
+Execute:
+  call phpdocblocks#insert("test")
 
-"Expect:
-  "/**
-   "* test
-   "*
-   "* @return string
-   "*/
-  "public function test()
-  "{
-      "$testString = "test\"test';)(}{";
-      "if($test) {
-          "return "test\"test';)(}{";
-      "} elseif($test === "test") {
-          "return "test\"test';)(}{";
-      "} else {
-          "return $testString;
-      "}
-  "}
+Expect:
+  /**
+   * test
+   *
+   * @return User
+   */
+  public function test(): User
+  {
+      if($test === "test") {
+          return new User;
+      }
+  }
+
+======================================================
+
+Given (Return type defined in declaration - int):
+  public function test(): int
+  {
+      if($test === "test") {
+          return $this->getInt();
+      }
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return int
+   */
+  public function test(): int
+  {
+      if($test === "test") {
+          return $this->getInt();
+      }
+  }
 
 ======================================================
 
@@ -70,6 +86,7 @@ Expect:
           return 7346734;
       }
   }
+
 ======================================================
 
 Given (Return multiple - string|int|array):

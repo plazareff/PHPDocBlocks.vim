@@ -1,11 +1,6 @@
-" TODO: Edit existing doc block if exists
-" TODO: methods, classes, consts, file, interfaces, traits, vars
-" TODO: Editable templates for each doc block type
-" TODO: Tab to descriptions
-" TODO: Make a :PHPDocBlocks command that can be run or mapped 
-" NOTE: %(\s|\n)* = non-capturing group to match whitespace and line breaks
-" TODO: If has return statement and a throw statement in codeblock the return
-" has to be mixed??
+" Add '@return void' to procedures 
+let g:phpdocblocks_return_void = 1
+
 
 " Inserts a doc block above the current cursor line
 function! phpdocblocks#insert(...)
@@ -39,7 +34,6 @@ endfunction
 
 
 " Return the code block as a string
-" TODO: Multi-line strings?
 function! s:codeBlockWithoutStringContent()
 
     let l:codeBlock = ""

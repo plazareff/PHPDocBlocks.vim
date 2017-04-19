@@ -5,7 +5,8 @@ function! phpdocblocks#function#parse(codeBlock)
     let l:indent = matchstr(a:codeBlock, '\v^\s*')
 
     " Match a valid function syntax, capture the name and parameters
-    let l:functionParts = matchlist(a:codeBlock, '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*\{')
+    let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)[:]{0,1}%(\s|\n)*%(\w*)%(\s|\n)*\{'
+    let l:functionParts = matchlist(a:codeBlock, l:functionPartsRegex)
 
     if l:functionParts != []
         let l:parameters = l:functionParts[2]
@@ -26,7 +27,7 @@ function! phpdocblocks#function#parse(codeBlock)
     " Viml list of lines to append as the PHP documentaion block
     let l:phpDocBlock = ["/**",
                    \" * ".l:name,
-                   \" *"] + l:param + l:throws
+                   \" *".l:functionParts[3]] + l:param + l:throws
     if l:return != ""
         call add(l:phpDocBlock, l:return)
     endif
@@ -44,15 +45,21 @@ function! phpdocblocks#function#parse(codeBlock)
 endfunction
 
 
-" TODO: A return in a catch block shouldn't be documented as @return?
 " Returns a single DocBlock line: @return <type>
 function! s:parseFunctionReturn(codeBlock)
 
     let l:codeBlock = s:removeArrayContents(a:codeBlock)
 
+    let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)[:]{0,1}%(\s|\n)*(\w*)%(\s|\n)*\{'
+    let l:declaredReturn = matchlist(l:codeBlock, l:declaredReturnRegex)
+    if l:declaredReturn[1] != ""
+        return " * @return ".l:declaredReturn[1]
+    endif
+
     let l:matchPosition = ["",0,0]
     let l:returnRegex = '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]'
     let l:returnTypes = []
+    let l:declaredReturn = matchlist(l:codeBlock, l:declaredReturnRegex)
 
     if matchstr(l:codeBlock, l:returnRegex) != ""
 
@@ -99,12 +106,15 @@ function! s:parseFunctionReturn(codeBlock)
 
     endif
 
-    return " * @return void"
+    if g:phpdocblocks_return_void
+        return " * @return void"
+    endif
+
+    return ""
 
 endfunction
 
 
-" TODO: In order of appearance for @throws
 " Returns a list of @throws DocBlock lines
 function! s:parseFunctionThrows(codeBlock)
 
