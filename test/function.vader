@@ -119,3 +119,26 @@ Expect:
       }
       return "test";
   }
+
+======================================================
+
+Given (Function - return by reference):
+  public function &test()
+  {
+    return "string";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * &test
+   *
+   * @return string
+   */
+  public function &test()
+  {
+    return "string";
+  }
+

@@ -126,6 +126,31 @@ Expect:
 
 ======================================================
 
+Given (Multiple parameters - with default, type hinting or no hinting/default):
+  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  $param
+   * @param  int $param2
+   * @param  float $param3
+   * @param  bool $param4
+   * @param  array $param5
+   * @return void
+   */
+  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2])
+  {
+  }
+
+======================================================
+
 Given (Parameter with default value - string - double quotes):
   public function test($test = "fu'nct,ion\" name()}{")
   {
@@ -142,6 +167,119 @@ Expect:
    * @return void
    */
   public function test($test = "fu'nct,ion\" name()}{")
+  {
+  }
+
+======================================================
+
+Given (Parameter - by reference):
+  public function test(&$test)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  &$test
+   * @return void
+   */
+  public function test(&$test)
+  {
+  }
+
+======================================================
+
+Given (Parameter - by reference - multiple):
+  public function test(&$test, &$test2, &$test3)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  &$test
+   * @param  &$test2
+   * @param  &$test3
+   * @return void
+   */
+  public function test(&$test, &$test2, &$test3)
+  {
+  }
+
+======================================================
+
+Given (Parameter - by reference - typehint):
+  public function test(string &$test, int &$test2, array &$test3)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string &$test
+   * @param  int &$test2
+   * @param  array &$test3
+   * @return void
+   */
+  public function test(string &$test, int &$test2, array &$test3)
+  {
+  }
+
+======================================================
+
+Given (Parameter - by reference - default):
+  public function test(&$test = "string", &$test2 = 743843, &$test3 = ["one","two"])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string &$test
+   * @param  int &$test2
+   * @param  array &$test3
+   * @return void
+   */
+  public function test(&$test = "string", &$test2 = 743843, &$test3 = ["one","two"])
+  {
+  }
+
+======================================================
+
+Given (Parameter - by reference - typehint and default):
+  public function test(string &$test = "string", int &$test2 = 743843, array &$test3 = ["one","two"])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string &$test
+   * @param  int &$test2
+   * @param  array &$test3
+   * @return void
+   */
+  public function test(string &$test = "string", int &$test2 = 743843, array &$test3 = ["one","two"])
   {
   }
 
