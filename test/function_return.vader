@@ -201,6 +201,66 @@ Expect:
 
 ======================================================
 
+Given (Return string - multi-line - double quotes):
+  public function test()
+  {
+
+  return "fu'nct,
+  ion\" na
+  me()}{";
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+
+  return "fu'nct,
+  ion\" na
+  me()}{";
+
+  }
+
+======================================================
+
+Given (Return string - multi-line - single quotes):
+  public function test()
+  {
+
+  return 'fu"nct,
+  ion\' na
+  me()}{';
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  {
+
+  return 'fu"nct,
+  ion\' na
+  me()}{';
+
+  }
+
+======================================================
+
 Given (Return integer - unsigned):
   public function test()
   {

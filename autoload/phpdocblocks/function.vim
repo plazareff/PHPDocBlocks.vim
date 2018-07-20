@@ -12,7 +12,7 @@ function! phpdocblocks#function#parse(codeBlock)
         let l:parameters = l:functionParts[2]
         let l:name = l:functionParts[1]
     else
-        return ["error","Sorry, I can't find a valid PHP function declaration on this line."]
+        return ["error","Invalid PHP function declaration on this line."]
     endif
 
     " @param
@@ -241,24 +241,7 @@ endfunction
 
 
 function! s:removeDuplicateListElements(list)
-
-    let l:uniqueList = []
-    for l:listElement in a:list
-
-        let l:inUniqueList = 0
-        for l:uniqueListElement in l:uniqueList
-            if l:listElement == l:uniqueListElement
-                let l:inUniqueList = 1
-                break
-            endif
-        endfor
-
-        if !l:inUniqueList
-            call add(l:uniqueList, l:listElement)
-        endif
-
-    endfor
-
-    return l:uniqueList
-
+    " if an element appears more than once in the list,
+    " remove it, then continue to the next element and repeat
+    return filter(a:list, 'count(a:list, v:val) == 1')
 endfunction

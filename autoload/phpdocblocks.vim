@@ -26,11 +26,13 @@ function! phpdocblocks#insert(...)
             call append((l:cursorLineNum-1), "====== ERROR ======")
             call append((l:cursorLineNum), l:output[1])
             call append((l:cursorLineNum+1), "===================")
+            call append((l:cursorLineNum-1), l:codeBlock)
         else
              execute "echohl Error | echon 'PHPDocBlocks: '.l:output[1] | echohl Normal"
         endif
-    elseif len(l:output) > 0
+   elseif len(l:output) > 0
         call append((l:cursorLineNum-1), l:output)
+        "call append((l:cursorLineNum-1), l:codeBlock)
     endif
 
 endfunction
@@ -40,23 +42,53 @@ endfunction
 function! s:codeBlockWithoutStringContent()
 
     let l:codeBlock = ""
-    let l:depth = 0
+    let l:blockDepth = 0
     let l:lineNumber = line('.')
     let l:totalLinesInDocument = line('$')
+    let l:isDoubleQuoteString = 0
+    let l:isSingleQuoteString = 0
 
     while l:lineNumber <= l:totalLinesInDocument
         let l:line = getline(l:lineNumber)
-        let l:line = s:removeStringContent(l:line)
+        " Remove escaped quotes
+        let l:line = substitute(l:line, '\v\\"|\\''', "", "g")
+        " Remove all string content over multiple lines
+        let l:chars = split(l:line, '\zs')
+        let l:line = ""
+        for l:char in l:chars
+            if l:isSingleQuoteString == 0 && l:isDoubleQuoteString == 0
+                if l:char == "'"
+                    let l:isSingleQuoteString = 1
+                    let l:line .= "'"
+                elseif l:char == '"'
+                    let l:isDoubleQuoteString = 1
+                    let l:line .= '"'
+                else
+                    let l:line .= l:char
+                endif
+            elseif l:isSingleQuoteString == 1
+                if l:char == "'"
+                    let l:isSingleQuoteString = 0
+                    let l:line .= "'"
+                endif
+            elseif l:isDoubleQuoteString == 1
+                if l:char == '"'
+                    let l:isDoubleQuoteString = 0
+                    let l:line .= '"'
+                endif
+            endif
+        endfor
+        " Find the closing brace for the code block
         let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
         if l:openingBraceCount > 0
-            let l:depth += l:openingBraceCount
+            let l:blockDepth += l:openingBraceCount
         endif
         let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
         if l:closingBraceCount > 0
-            let l:depth -= l:closingBraceCount
+            let l:blockDepth -= l:closingBraceCount
         endif
-        let l:codeBlock .= l:line."\n"
-        if l:depth == 0 && l:closingBraceCount > 0
+        let l:codeBlock .= l:line
+        if l:blockDepth == 0 && l:closingBraceCount > 0
             break
         endif
         let l:lineNumber += 1
@@ -64,15 +96,4 @@ function! s:codeBlockWithoutStringContent()
 
     return l:codeBlock
 
-endfunction
-
-
-function! s:removeEscapedQuotes(string)
-    return substitute(a:string, '\v\\"|\\''', "", "g")
-endfunction
-
-
-function! s:removeStringContent(string)
-    let l:string = s:removeEscapedQuotes(a:string)
-    return substitute(l:string, '\v".{-}"|''.{-}''', "\"\"", "g")
 endfunction

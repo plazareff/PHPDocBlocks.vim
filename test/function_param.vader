@@ -95,7 +95,7 @@ Given (Multiple parameters - with default and type hinting - on new lines):
                         int $param2 = 734734 , 
                         float $param3 = 3434.474 , 
                         bool $param4 = true , 
-                        array $param5 = ["array","array2]
+                        array $param5 = ["array","array2"]
   )
   {
   }
@@ -119,7 +119,7 @@ Expect:
                         int $param2 = 734734 , 
                         float $param3 = 3434.474 , 
                         bool $param4 = true , 
-                        array $param5 = ["array","array2]
+                        array $param5 = ["array","array2"]
   )
   {
   }
@@ -127,7 +127,7 @@ Expect:
 ======================================================
 
 Given (Multiple parameters - with default, type hinting or no hinting/default):
-  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2])
+  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2"])
   {
   }
 
@@ -145,28 +145,7 @@ Expect:
    * @param  array $param5
    * @return void
    */
-  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2])
-  {
-  }
-
-======================================================
-
-Given (Parameter with default value - string - double quotes):
-  public function test($test = "fu'nct,ion\" name()}{")
-  {
-  }
-
-Execute:
-  call phpdocblocks#insert("test")
-
-Expect:
-  /**
-   * test
-   *
-   * @param  string $test
-   * @return void
-   */
-  public function test($test = "fu'nct,ion\" name()}{")
+  public function test($param, int $param2, float $param3, $param4 = true, $param5 = ["array","array2"])
   {
   }
 
@@ -285,6 +264,27 @@ Expect:
 
 ======================================================
 
+Given (Parameter with default value - string - double quotes):
+  public function test($test = "fu'nct,ion\" name()}{")
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string $test
+   * @return void
+   */
+  public function test($test = "fu'nct,ion\" name()}{")
+  {
+  }
+
+======================================================
+
 Given (Parameter with default value - string - single quotes):
   public function test($test = 'fu"nct,ion\' name()}{')
   {
@@ -302,6 +302,122 @@ Expect:
    */
   public function test($test = 'fu"nct,ion\' name()}{')
   {
+  }
+
+======================================================
+
+Given (Parameter with default value - string - double quotes - multi-line string):
+  public function test($test = "fu'nct
+  io,n\" na
+  me(){}")
+  {
+    return "string";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string $test
+   * @return string
+   */
+  public function test($test = "fu'nct
+  io,n\" na
+  me(){}")
+  {
+    return "string";
+  }
+
+======================================================
+
+Given (Parameter with default value - string - single quotes - multi-line string):
+  public function test($test = 'fu"nct,
+  ion\' na
+  me(){}')
+  {
+    return "string";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string $test
+   * @return string
+   */
+  public function test($test = 'fu"nct,
+  ion\' na
+  me(){}')
+  {
+    return "string";
+  }
+
+======================================================
+
+Given (Parameter with default value - string - double quotes - multi-line string with opening and closing brace):
+  public function test($test = "test 
+  multi
+  line
+  parameter
+  with {}")
+  {
+    return "string";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string $test
+   * @return string
+   */
+  public function test($test = "test 
+  multi
+  line
+  parameter
+  with {}")
+  {
+    return "string";
+  }
+
+======================================================
+
+Given (Parameter with default value - string - single quotes - multi-line string with opening and closing brace):
+  public function test($test = 'test 
+  multi
+  line
+  parameter
+  with {}')
+  {
+    return "string";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string $test
+   * @return string
+   */
+  public function test($test = 'test 
+  multi
+  line
+  parameter
+  with {}')
+  {
+    return "string";
   }
 
 ======================================================
