@@ -479,14 +479,14 @@ Expect:
   /**
    * test
    *
-   * @throws \Nested1Exception
-   * @throws \Nested2Exception
-   * @throws \Nested3Exception
    * @throws \Catch1Exception
-   * @throws \Catch2Exception
-   * @throws \Catch3Exception
    * @throws \Throw1Exception
+   * @throws \Nested1Exception
    * @throws \Throw2Exception
+   * @throws \Nested2Exception
+   * @throws \Catch2Exception
+   * @throws \Nested3Exception
+   * @throws \Catch3Exception
    * @throws \Throw3Exception
    * @return void
    */

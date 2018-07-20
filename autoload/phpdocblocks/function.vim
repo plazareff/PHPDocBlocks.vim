@@ -131,6 +131,7 @@ function! s:parseFunctionThrows(codeBlock)
 
     let l:exceptionSyntaxes = [l:nestedThrowRegex, l:catchRegex, l:throwRegex]
     let l:throws = []
+    let l:exceptionsWithPosition = []
     let l:nestedThrowCode = []
     let l:matchPosition = ["",0,0]
     let l:codeBlock = a:codeBlock
@@ -145,7 +146,7 @@ function! s:parseFunctionThrows(codeBlock)
                 let l:exceptionNames[1] = l:exceptionNames[2]
             endif
             if l:matchPosition[2] != -1
-                call add(l:throws, " * @throws ".l:exceptionNames[1])
+                call add(l:exceptionsWithPosition, [l:exceptionNames[1], l:matchPosition[1]])
                 continue
             endif
             break
@@ -153,11 +154,39 @@ function! s:parseFunctionThrows(codeBlock)
         " Prevent duplicate exceptions from being found
         if len(l:nestedThrowCode) > 0
             for nestedThrowCode in l:nestedThrowCode
+                " Keep the character positions the same in the code block
+                let l:x = 0
+                let l:placeholder = ""
+                while l:x < len(nestedThrowCode)
+                    let l:placeholder .= "a"
+                    let l:x += 1
+                endwhile
                 let nestedThrowCode = substitute(nestedThrowCode, '\\', '\\\\', "g")
-                let l:codeBlock = substitute(l:codeBlock, '\M'.nestedThrowCode, "", "")
+                let l:codeBlock = substitute(l:codeBlock, '\M'.nestedThrowCode, l:placeholder, "")
             endfor
             let l:nestedThrowCode = []
         endif
+    endfor
+
+    " Order the exceptions as they appear in the code block
+    let l:sorting = 1
+    while l:sorting == 1
+        let l:sorting = 0
+        let l:i = 0
+        let l:exceptionToSwap = []
+        while l:i < len(l:exceptionsWithPosition)-1
+            if l:exceptionsWithPosition[l:i][1] > l:exceptionsWithPosition[l:i+1][1]
+                let l:exceptionToSwap = l:exceptionsWithPosition[l:i]
+                let l:exceptionsWithPosition[l:i] = l:exceptionsWithPosition[l:i+1]
+                let l:exceptionsWithPosition[l:i+1] = l:exceptionToSwap
+                let l:sorting = 1
+            endif
+            let l:i += 1
+        endwhile
+    endwhile
+
+    for exception in l:exceptionsWithPosition
+        call add(l:throws, " * @throws ".exception[0])
     endfor
 
     return l:throws
