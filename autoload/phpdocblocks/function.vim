@@ -5,7 +5,7 @@ function! phpdocblocks#function#parse(codeBlock)
     let l:indent = matchstr(a:codeBlock, '\v^\s*')
 
     " Match a valid function syntax, capture the name and parameters
-    let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)[:]{0,1}%(\s|\n)*%(\w*)%(\s|\n)*\{'
+    let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)[:]{0,1}%(\s|\n)*%(\w*|[?]\w*)%(\s|\n)*\{'
     let l:functionParts = matchlist(a:codeBlock, l:functionPartsRegex)
 
     if l:functionParts != []
@@ -50,9 +50,13 @@ function! s:parseFunctionReturn(codeBlock)
 
     let l:codeBlock = s:removeArrayContents(a:codeBlock)
 
-    let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)[:]{0,1}%(\s|\n)*(\w*)%(\s|\n)*\{'
+    let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)[:]{0,1}%(\s|\n)*(\w*|[?]\w*)%(\s|\n)*\{'
     let l:declaredReturn = matchlist(l:codeBlock, l:declaredReturnRegex)
     if l:declaredReturn[1] != ""
+        " Return type nullable?
+        if l:declaredReturn[1][0] == "?"
+            return " * @return ".l:declaredReturn[1][1:]."|null"
+        endif
         return " * @return ".l:declaredReturn[1]
     endif
 
@@ -211,6 +215,7 @@ function! s:parseFunctionParameters(parameters)
 
     let l:params = []
     for i in l:paramsList
+        let l:isNullable = 0
         " Convert all whitespace and new lines to a single space globally
         let i = substitute(i, '\v(\s|\n)+', " ", "g")
         " Strip leading and trailing spaces
@@ -224,8 +229,22 @@ function! s:parseFunctionParameters(parameters)
                 let i = l:paramType." ".i
             endif
         endif
+        " Determine if the parameter is nullable and not defined as nullable
+        " with a ? in front of the type hint
+        if matchstr(i, '\v\c^[&]{0,1}\w+[ ]*[$]\w+[ ]*[=][ ]*null[ ]*$') != ""
+            let i = "?".i
+        endif
         " Remove everything from '=' to the end of line
         let i = substitute(i, '\v[ ]*[=][ ]*(.{-})[ ]*$', "", "")
+        "if ? on front of the typehint it is a nullable parameter
+        if i[0] == "?"
+            let l:paramParts = matchlist(i, '\v(^[?][&]{0,1}\w*)([ ]*[$]\w*)')
+            if l:paramParts[1] != "?null"
+                let i = l:paramParts[1][1:]."|null".l:paramParts[2]
+            else
+                let i = i[1:]
+            endif
+        endif
         " Function contains variable arguments (...$args)
         if matchstr(i, '\v\.\.\.\$') != ""
             " Remove ... from start then add to end with a comma
@@ -261,6 +280,9 @@ function! s:getPhpType(syntax)
     " Matches [] or array() - case insensitive
     elseif matchstr(a:syntax, '\v\c^\[\]|array\(\)$') != ""
         return "array"
+    " Null - case insensitive
+    elseif matchstr(a:syntax, '\v\c^null$') != ""
+        return "null"
     endif
     return ""
 endfunction

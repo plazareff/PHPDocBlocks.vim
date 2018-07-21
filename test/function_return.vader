@@ -1,5 +1,3 @@
-" TODO: Multiple returns
-" TODO: A few other tests
 
 ======================================================
 
@@ -50,6 +48,32 @@ Expect:
   {
       if($test === "test") {
           return $this->getInt();
+      }
+  }
+
+======================================================
+
+Given (Return type defined in declaration - User object - Nullable):
+  public function test(): ?User
+  {
+      if($test === "test") {
+          return new User;
+      }
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return User|null
+   */
+  public function test(): ?User
+  {
+      if($test === "test") {
+          return new User;
       }
   }
 
@@ -257,6 +281,52 @@ Expect:
   ion\' na
   me()}{';
 
+  }
+
+======================================================
+
+Given (Return void - no return statement):
+  public function test()
+  {
+      $var = "no return";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  public function test()
+  {
+      $var = "no return";
+  }
+
+======================================================
+
+Given (Return void - return statement empty):
+  public function test()
+  {
+      $var = "empty return";
+      return;
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  public function test()
+  {
+      $var = "empty return";
+      return;
   }
 
 ======================================================
@@ -522,4 +592,48 @@ Expect:
   public function test()
   {
       return ["test", 'test'];
+  }
+
+======================================================
+
+Given (Return null):
+  public function test()
+  {
+      return null;
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return null
+   */
+  public function test()
+  {
+      return null;
+  }
+
+======================================================
+
+Given (Return null - Uppercase):
+  public function test()
+  {
+      return NULL;
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return null
+   */
+  public function test()
+  {
+      return NULL;
   }

@@ -674,6 +674,174 @@ Expect:
 
 ======================================================
 
+Given (Parameter with default value - null - lowercase):
+  public function test($test = null)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  null $test
+   * @return void
+   */
+  public function test($test = null)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - NULL - Uppercase):
+  public function test($test = NULL)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  null $test
+   * @return void
+   */
+  public function test($test = NULL)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - Default of null with different type hint):
+  public function test(Type $test = null)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  Type|null $test
+   * @return void
+   */
+  public function test(Type $test = null)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - Nullable):
+  public function test(?Type $test)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  Type|null $test
+   * @return void
+   */
+  public function test(?Type $test)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - Nullable - with default value null):
+  public function test(?Type $test = null)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  Type|null $test
+   * @return void
+   */
+  public function test(?Type $test = null)
+  {
+  }
+
+======================================================
+
+Given (Parameter - string Nullable):
+  public function test(?string $test)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string|null $test
+   * @return void
+   */
+  public function test(?string $test)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value null - Nullable):
+  public function test(?string $test = null)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string|null $test
+   * @return void
+   */
+  public function test(?string $test = null)
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value a string - Nullable):
+  public function test(?string $test = "string")
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  string|null $test
+   * @return void
+   */
+  public function test(?string $test = "string")
+  {
+  }
+
+======================================================
+
 Given (Parameter with type hint - string):
   public function test(string $test)
   {
