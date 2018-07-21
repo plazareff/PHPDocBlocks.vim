@@ -124,49 +124,51 @@ function! s:parseFunctionThrows(codeBlock)
     " Match throw new statement, capture the exception name
     let l:throwRegex = '\vthrow%(\s|\n)+new%(\s|\n)+(\\\u.{-}|\u.{-})%(\s|\n)*\(.{-}\)%(\s|\n)*[;]'
 
-    " Match throw statements nested inside catch blocks
-    " Limitation: Only matches whitespace / newlines between the catch block
-    " declaration and the throw statement
-    let l:nestedThrowRegex = l:catchRegex.'%(\s|\n)*'.l:throwRegex
-
-    let l:exceptionSyntaxes = [l:nestedThrowRegex, l:catchRegex, l:throwRegex]
+    let l:codeBlock = a:codeBlock
     let l:throws = []
     let l:exceptionsWithPosition = []
     let l:nestedThrowCode = []
     let l:matchPosition = ["",0,0]
-    let l:codeBlock = a:codeBlock
-    for regex in l:exceptionSyntaxes
+
+    " Get catches that have no throw
+    while l:matchPosition[2] != -1
+        " Get the catch code block
+        let l:matchPosition = matchstrpos(l:codeBlock, l:catchRegex, l:matchPosition[2])
+        let l:i = l:matchPosition[2]-1
+        let l:blockDepth = 0
+        let l:catchBlock = ""
         while 1
-            " Start matching from the end of the last match
-            let l:matchPosition = matchstrpos(l:codeBlock, regex, l:matchPosition[2])
-            let l:exceptionNames = matchlist(l:matchPosition[0], regex)
-            if len(l:exceptionNames) > 2 && l:exceptionNames[2] != ""
-                call add(l:nestedThrowCode, l:exceptionNames[0])
-                " Use the nested throw exception name
-                let l:exceptionNames[1] = l:exceptionNames[2]
+            if l:codeBlock[l:i] == "{"
+                let l:blockDepth += 1
+            elseif l:codeBlock[l:i] == "}"
+                let l:blockDepth -= 1
             endif
-            if l:matchPosition[2] != -1
-                call add(l:exceptionsWithPosition, [l:exceptionNames[1], l:matchPosition[1]])
-                continue
+            let l:catchBlock .= l:codeBlock[l:i]
+            let l:i += 1
+            if l:blockDepth == 0
+                break
             endif
-            break
         endwhile
-        " Prevent duplicate exceptions from being found
-        if len(l:nestedThrowCode) > 0
-            for nestedThrowCode in l:nestedThrowCode
-                " Keep the character positions the same in the code block
-                let l:x = 0
-                let l:placeholder = ""
-                while l:x < len(nestedThrowCode)
-                    let l:placeholder .= "a"
-                    let l:x += 1
-                endwhile
-                let nestedThrowCode = substitute(nestedThrowCode, '\\', '\\\\', "g")
-                let l:codeBlock = substitute(l:codeBlock, '\M'.nestedThrowCode, l:placeholder, "")
-            endfor
-            let l:nestedThrowCode = []
+        " Get exception names from catches without throws
+        let l:exceptionNames = []
+        let l:matchThrowInCatch = matchlist(l:catchBlock, l:throwRegex)
+        if len(l:matchThrowInCatch) == 0
+            let l:exceptionNames = matchlist(l:matchPosition, l:catchRegex)
+            if len(l:exceptionNames) > 0 && l:matchPosition[2] != -1
+                call add(l:exceptionsWithPosition, [l:exceptionNames[1], l:matchPosition[1]])
+            endif
         endif
-    endfor
+    endwhile
+
+    " Get all throw statements
+    let l:matchPosition = ["",0,0]
+    while l:matchPosition[2] != -1
+        let l:matchPosition = matchstrpos(l:codeBlock, l:throwRegex, l:matchPosition[2])
+        let l:exceptionNames = matchlist(l:matchPosition, l:throwRegex)
+        if len(l:exceptionNames) > 0 && l:matchPosition[2] != -1
+            call add(l:exceptionsWithPosition, [l:exceptionNames[1], l:matchPosition[1]])
+        endif
+    endwhile
 
     " Order the exceptions as they appear in the code block
     let l:sorting = 1
