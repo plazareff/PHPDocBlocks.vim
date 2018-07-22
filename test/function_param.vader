@@ -1028,3 +1028,45 @@ Expect:
   public function test(User $test)
   {
   }
+
+======================================================
+
+Given (Variadic Function):
+  public function test(...$test)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  mixed $test,...
+   * @return void
+   */
+  public function test(...$test)
+  {
+  }
+
+======================================================
+
+Given (Variadic Function with typehint):
+  public function test(int ...$test)
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  int $test,...
+   * @return void
+   */
+  public function test(int ...$test)
+  {
+  }

@@ -215,7 +215,6 @@ function! s:parseFunctionParameters(parameters)
 
     let l:params = []
     for i in l:paramsList
-        let l:isNullable = 0
         " Convert all whitespace and new lines to a single space globally
         let i = substitute(i, '\v(\s|\n)+', " ", "g")
         " Strip leading and trailing spaces
