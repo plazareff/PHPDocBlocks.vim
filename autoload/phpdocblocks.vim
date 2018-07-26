@@ -4,20 +4,20 @@ command! -nargs=0 PHPDocBlocks :call phpdocblocks#insert()
 " Add '@return void' to procedures 
 let g:phpdocblocks_return_void = 1
 
-
 " Inserts a doc block above the current cursor line
 function! phpdocblocks#insert(...)
 
     let l:cursorLineContent = getline('.')
     let l:cursorLineNum = line('.')
+    let l:codeBlock = s:codeBlockWithoutStringContent()
+    let l:indent = matchstr(l:codeBlock, '\v^\s*')
+    let l:output = []
 
-    " Default error
-    let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
-
-    " Function
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
-        let l:codeBlock = s:codeBlockWithoutStringContent()
-        let l:output = phpdocblocks#function#parse(l:codeBlock)
+        let l:docData = phpdocblocks#function#parse(l:codeBlock)
+        let l:output += s:docTemplate(l:docData, "function")
+    else
+        let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
     endif
 
     if l:output[0] == 'error'
@@ -31,10 +31,52 @@ function! phpdocblocks#insert(...)
              execute "echohl Error | echon 'PHPDocBlocks: '.l:output[1] | echohl Normal"
         endif
    elseif len(l:output) > 0
-        call append((l:cursorLineNum-1), l:output)
+        " Add indent
+        let l:indentedOutput = []
+        for l:o in l:output
+            let l:indentedOutput += [l:indent.l:o]
+        endfor
+        call append((l:cursorLineNum-1), l:indentedOutput)
         "call append((l:cursorLineNum-1), l:codeBlock)
     endif
 
+endfunction
+
+
+" Compose a doc block from a template
+function! s:docTemplate(docData, docType)
+    let l:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+    let l:templateLines = readfile(l:path."/PHPDocBlocks.vim/templates/".a:docType.".tpl")
+    let l:output = []
+    for l:templateLine in l:templateLines
+        if l:templateLine[0] != "#" && l:templateLine != ""
+            let l:tagName = matchlist(l:templateLine, '\v\c\{\{[ ]*(.{-})[ ]*\}\}')
+            if l:tagName != []
+                let l:output += s:transformTemplateLine(a:docData, l:tagName[1], l:templateLine)
+            else
+                call add(l:output, l:templateLine)
+            endif
+        endif
+    endfor
+    return l:output
+endfunction
+
+
+" Convert template tags to documentation data
+function! s:transformTemplateLine(docData, tagName, templateLine)
+    let l:output = []
+    if has_key(a:docData, a:tagName)
+        let l:lineRegex = '\v^(.{-})\{\{[ ]*'.a:tagName.'[ ]*\}\}(.{-})$'
+        let l:linePart = matchlist(a:templateLine, l:lineRegex)
+        if type(a:docData[a:tagName]) == v:t_list
+            for l:data in a:docData[a:tagName]
+                call add(l:output, l:linePart[1].l:data.l:linePart[2])
+            endfor
+        else
+            call add(l:output, l:linePart[1].a:docData[a:tagName].l:linePart[2])
+        endif
+    endif
+    return l:output
 endfunction
 
 

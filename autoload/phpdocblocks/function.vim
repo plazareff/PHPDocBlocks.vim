@@ -1,51 +1,25 @@
 " Return a list of lines that make up the doc block
 function! phpdocblocks#function#parse(codeBlock)
-
-    " Get the indentation level from the first line
-    let l:indent = matchstr(a:codeBlock, '\v^\s*')
-
     " Match a valid function syntax, capture the name and parameters
     let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)[:]{0,1}%(\s|\n)*%(\w*|[?]\w*)%(\s|\n)*\{'
     let l:functionParts = matchlist(a:codeBlock, l:functionPartsRegex)
-
     if l:functionParts != []
         let l:parameters = l:functionParts[2]
         let l:name = l:functionParts[1]
     else
         return ["error","Invalid PHP function declaration on this line."]
     endif
-
-    " @param
-    let l:param = s:parseFunctionParameters(l:parameters)
-
-    " @throws
+    " Parameters
+    let l:parameters = s:parseFunctionParameters(l:parameters)
+    " Exceptions
     let l:throws = s:parseFunctionThrows(a:codeBlock)
-
-    " @return
+    " Return type
     let l:return = s:parseFunctionReturn(a:codeBlock)
-
-    " Viml list of lines to append as the PHP documentaion block
-    let l:phpDocBlock = ["/**",
-                   \" * ".l:name,
-                   \" *"] + l:param + l:throws
-    if l:return != ""
-        call add(l:phpDocBlock, l:return)
-    endif
-    call add(l:phpDocBlock, " */")
-
-    " Loop through each line and add the appropriate indent
-    let l:x = 0
-    for i in l:phpDocBlock
-        let l:phpDocBlock[l:x] = l:indent."".l:phpDocBlock[l:x]
-        let l:x += 1
-    endfor
-
-    return l:phpDocBlock
-
+    return {'name': l:name, 'param': l:parameters, 'throws': l:throws, 'return': l:return,}
 endfunction
 
 
-" Returns a single DocBlock line: @return <type>
+" Returns the return type
 function! s:parseFunctionReturn(codeBlock)
 
     let l:codeBlock = s:removeArrayContents(a:codeBlock)
@@ -55,15 +29,14 @@ function! s:parseFunctionReturn(codeBlock)
     if l:declaredReturn[1] != ""
         " Return type nullable?
         if l:declaredReturn[1][0] == "?"
-            return " * @return ".l:declaredReturn[1][1:]."|null"
+            return l:declaredReturn[1][1:]."|null"
         endif
-        return " * @return ".l:declaredReturn[1]
+        return l:declaredReturn[1]
     endif
 
     let l:matchPosition = ["",0,0]
     let l:returnRegex = '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]'
     let l:returnTypes = []
-    let l:declaredReturn = matchlist(l:codeBlock, l:declaredReturnRegex)
 
     if matchstr(l:codeBlock, l:returnRegex) != ""
 
@@ -106,12 +79,12 @@ function! s:parseFunctionReturn(codeBlock)
             let l:returnType = substitute(l:returnType, '\v\|$', "", "")
         endif
 
-        return " * @return ".l:returnType
+        return l:returnType
 
     endif
 
     if g:phpdocblocks_return_void
-        return " * @return void"
+        return "void"
     endif
 
     return ""
@@ -119,7 +92,7 @@ function! s:parseFunctionReturn(codeBlock)
 endfunction
 
 
-" Returns a list of @throws DocBlock lines
+" Returns a list of exceptions
 function! s:parseFunctionThrows(codeBlock)
 
     " Match catch(Exception $var), capture exception name
@@ -192,7 +165,7 @@ function! s:parseFunctionThrows(codeBlock)
     endwhile
 
     for exception in l:exceptionsWithPosition
-        call add(l:throws, " * @throws ".exception[0])
+        call add(l:throws, exception[0])
     endfor
 
     return l:throws
@@ -200,7 +173,7 @@ function! s:parseFunctionThrows(codeBlock)
 endfunction
 
 
-" Returns a list of @param DocBlock lines
+" Returns a list of parameters
 function! s:parseFunctionParameters(parameters)
 
     let l:parameters = s:removeArrayContents(a:parameters)
@@ -254,7 +227,7 @@ function! s:parseFunctionParameters(parameters)
                 let i = "mixed ".i
             endif
         endif
-        call add(l:params, " * @param  ".i)
+        call add(l:params, i)
     endfor
 
     return l:params
