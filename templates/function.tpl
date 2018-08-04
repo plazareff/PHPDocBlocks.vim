@@ -12,9 +12,9 @@
 
 # Default:
 # /**
-# * {{name}}
-# *
-# * @param  {{param}}
-# * @throws {{throws}}
-# * @return {{return}}
-# */
+#  * {{name}}
+#  *
+#  * @param  {{param}}
+#  * @throws {{throws}}
+#  * @return {{return}}
+#  */

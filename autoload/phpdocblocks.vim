@@ -9,13 +9,27 @@ function! phpdocblocks#insert(...)
 
     let l:cursorLineContent = getline('.')
     let l:cursorLineNum = line('.')
-    let l:codeBlock = s:codeBlockWithoutStringContent()
-    let l:indent = matchstr(l:codeBlock, '\v^\s*')
     let l:output = []
+    let l:code = ""
 
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
-        let l:docData = phpdocblocks#function#parse(l:codeBlock)
-        let l:output += s:docTemplate(l:docData, "function")
+        let l:code = s:codeWithoutStringContent("block")
+        let l:docData = phpdocblocks#function#parse(l:code)
+        if type(l:docData) == v:t_dict
+            let l:output += s:docTemplate(l:docData, "function")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
+    elseif matchstr(l:cursorLineContent, '\v\${1}\w+') != ""
+        let l:code = s:codeWithoutStringContent("variable")
+        let l:docData = phpdocblocks#variable#parse(l:code)
+        if type(l:docData) == v:t_dict && type(l:docData["variable"]) == v:t_string
+            let l:output += s:docTemplate(l:docData, "variable")
+        elseif type(l:docData) == v:t_dict && type(l:docData["variable"]) == v:t_list
+            let l:output += s:docTemplate(l:docData, "multiple-variables")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
     else
         let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
     endif
@@ -26,22 +40,87 @@ function! phpdocblocks#insert(...)
             call append((l:cursorLineNum-1), "====== ERROR ======")
             call append((l:cursorLineNum), l:output[1])
             call append((l:cursorLineNum+1), "===================")
-            call append((l:cursorLineNum-1), l:codeBlock)
+            call append((l:cursorLineNum-1), l:code)
         else
              execute "echohl Error | echon 'PHPDocBlocks: '.l:output[1] | echohl Normal"
         endif
    elseif len(l:output) > 0
         " Add indent
+        let l:indent = matchstr(l:code, '\v^\s*')
         let l:indentedOutput = []
         for l:o in l:output
             let l:indentedOutput += [l:indent.l:o]
         endfor
         call append((l:cursorLineNum-1), l:indentedOutput)
-        "call append((l:cursorLineNum-1), l:codeBlock)
+        "call append((l:cursorLineNum-1), l:code)
     endif
 
 endfunction
 
+" Return PHP type based on the syntax of a string
+function! phpdocblocks#getPhpType(syntax)
+    " Starts with ' or " (string)
+    if matchstr(a:syntax, '\v^''|"') != ""
+        return "string"
+    " A whole number
+    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
+        return "int"
+    " A number with a decimal
+    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
+        return "float"
+    " Is boolean - case insensitive
+    elseif matchstr(a:syntax, '\v\c^true|false$') != ""
+        return "bool"
+    " Matches [] or array() - case insensitive
+    elseif matchstr(a:syntax, '\v\c^\[\]|array\(\)$') != ""
+        return "array"
+    " Null - case insensitive
+    elseif matchstr(a:syntax, '\v\c^null$') != ""
+        return "null"
+    " Object instantiation - case insensitive
+    elseif matchstr(a:syntax, '\v\c^new \w+') != ""
+        let l:instantiation = matchlist(a:syntax, '\v\c^new (\w+)')
+        return l:instantiation[1]
+    endif
+    return ""
+endfunction
+
+" Match and replace all arrays with [] - Max depth 10
+function! s:removeArrayContents(string)
+    let l:arrayRegex1 = '%(%(.{-}array\('
+    let l:arrayRegex2 = '.{-}\))|%(.{-}\['
+    let l:arrayRegex3 = '.{-}\]))*'
+    let l:arrayRegex = ''
+    let l:i = 0
+    while l:i < 10
+        let l:arrayRegex = l:arrayRegex1.l:arrayRegex.l:arrayRegex2.l:arrayRegex.l:arrayRegex3
+        let l:i += 1
+    endwhile
+    let l:string = substitute(a:string, '\v%(array\(|\[)'.l:arrayRegex.'.{-}%(\)|\])', "[]", "g")
+    return l:string
+endfunction
+
+" Removes everything inside parentheses, except other parentheses
+function! s:removeParenthesesContents(string)
+    let l:chars = split(a:string, '\zs')
+    let l:string = ""
+    let l:depth = 0
+    for l:char in l:chars
+        if l:char == "("
+            let l:depth += 1
+            let l:string .= l:char
+            continue
+        elseif l:char == ')'
+            let l:depth -= 1
+            let l:string .= l:char
+            continue
+        endif
+        if l:depth == 0
+            let l:string .= l:char
+        endif
+    endfor
+    return l:string
+endfunction
 
 " Compose a doc block from a template
 function! s:docTemplate(docData, docType)
@@ -81,9 +160,9 @@ endfunction
 
 
 " Return the code block as a string
-function! s:codeBlockWithoutStringContent()
+function! s:codeWithoutStringContent(type)
 
-    let l:codeBlock = ""
+    let l:code = ""
     let l:blockDepth = 0
     let l:lineNumber = line('.')
     let l:totalLinesInDocument = line('$')
@@ -120,22 +199,34 @@ function! s:codeBlockWithoutStringContent()
                 endif
             endif
         endfor
-        " Find the closing brace for the code block
-        let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
-        if l:openingBraceCount > 0
-            let l:blockDepth += l:openingBraceCount
-        endif
-        let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
-        if l:closingBraceCount > 0
-            let l:blockDepth -= l:closingBraceCount
-        endif
-        let l:codeBlock .= l:line
-        if l:blockDepth == 0 && l:closingBraceCount > 0
-            break
+        if a:type == "block"
+            " Find the closing brace for the code block
+            let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
+            if l:openingBraceCount > 0
+                let l:blockDepth += l:openingBraceCount
+            endif
+            let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
+            if l:closingBraceCount > 0
+                let l:blockDepth -= l:closingBraceCount
+            endif
+            let l:code .= l:line
+            if l:blockDepth == 0 && l:closingBraceCount > 0
+                break
+            endif
+        elseif a:type == "variable"
+            let l:semicolonPosition = matchstrpos(l:line, ";")
+            if l:semicolonPosition[2] == -1
+                let l:code .= l:line
+            else
+                let l:code .= l:line[0:l:semicolonPosition[2]]
+                let l:code = s:removeParenthesesContents(l:code)
+                break
+            endif
         endif
         let l:lineNumber += 1
     endwhile
 
-    return l:codeBlock
+    let l:code = s:removeArrayContents(l:code)
+    return l:code
 
 endfunction

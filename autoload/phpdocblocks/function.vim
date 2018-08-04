@@ -22,10 +22,8 @@ endfunction
 " Returns the return type
 function! s:parseFunctionReturn(codeBlock)
 
-    let l:codeBlock = s:removeArrayContents(a:codeBlock)
-
     let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)[:]{0,1}%(\s|\n)*(\w*|[?]\w*)%(\s|\n)*\{'
-    let l:declaredReturn = matchlist(l:codeBlock, l:declaredReturnRegex)
+    let l:declaredReturn = matchlist(a:codeBlock, l:declaredReturnRegex)
     if l:declaredReturn[1] != ""
         " Return type nullable?
         if l:declaredReturn[1][0] == "?"
@@ -38,15 +36,15 @@ function! s:parseFunctionReturn(codeBlock)
     let l:returnRegex = '\vreturn%(\s|\n)+(.{-})%(\s|\n)*[;]'
     let l:returnTypes = []
 
-    if matchstr(l:codeBlock, l:returnRegex) != ""
+    if matchstr(a:codeBlock, l:returnRegex) != ""
 
         while 1
             " Start matching from the end of the last match
-            let l:matchPosition = matchstrpos(l:codeBlock, l:returnRegex, l:matchPosition[2])
+            let l:matchPosition = matchstrpos(a:codeBlock, l:returnRegex, l:matchPosition[2])
             if l:matchPosition[2] != -1
                 let l:returnValue = matchlist(l:matchPosition[0], l:returnRegex)
                 if len(l:returnValue) > 1
-                    let l:returnType = s:getPhpType(l:returnValue[1])
+                    let l:returnType = phpdocblocks#getPhpType(l:returnValue[1])
                 endif
                 call add(l:returnTypes, l:returnType)
                 continue
@@ -101,7 +99,6 @@ function! s:parseFunctionThrows(codeBlock)
     " Match throw new statement, capture the exception name
     let l:throwRegex = '\vthrow%(\s|\n)+new%(\s|\n)+(\\\u.{-}|\u.{-})%(\s|\n)*\(.{-}\)%(\s|\n)*[;]'
 
-    let l:codeBlock = a:codeBlock
     let l:throws = []
     let l:exceptionsWithPosition = []
     let l:nestedThrowCode = []
@@ -110,17 +107,17 @@ function! s:parseFunctionThrows(codeBlock)
     " Get catches that have no throw
     while l:matchPosition[2] != -1
         " Get the catch code block
-        let l:matchPosition = matchstrpos(l:codeBlock, l:catchRegex, l:matchPosition[2])
+        let l:matchPosition = matchstrpos(a:codeBlock, l:catchRegex, l:matchPosition[2])
         let l:i = l:matchPosition[2]-1
         let l:blockDepth = 0
         let l:catchBlock = ""
         while 1
-            if l:codeBlock[l:i] == "{"
+            if a:codeBlock[l:i] == "{"
                 let l:blockDepth += 1
-            elseif l:codeBlock[l:i] == "}"
+            elseif a:codeBlock[l:i] == "}"
                 let l:blockDepth -= 1
             endif
-            let l:catchBlock .= l:codeBlock[l:i]
+            let l:catchBlock .= a:codeBlock[l:i]
             let l:i += 1
             if l:blockDepth == 0
                 break
@@ -140,7 +137,7 @@ function! s:parseFunctionThrows(codeBlock)
     " Get all throw statements
     let l:matchPosition = ["",0,0]
     while l:matchPosition[2] != -1
-        let l:matchPosition = matchstrpos(l:codeBlock, l:throwRegex, l:matchPosition[2])
+        let l:matchPosition = matchstrpos(a:codeBlock, l:throwRegex, l:matchPosition[2])
         let l:exceptionNames = matchlist(l:matchPosition, l:throwRegex)
         if len(l:exceptionNames) > 0 && l:matchPosition[2] != -1
             call add(l:exceptionsWithPosition, [l:exceptionNames[1], l:matchPosition[1]])
@@ -176,15 +173,13 @@ endfunction
 " Returns a list of parameters
 function! s:parseFunctionParameters(parameters)
 
-    let l:parameters = s:removeArrayContents(a:parameters)
-
     " Empty parameter declaration?
-    if matchstr(l:parameters, '\v^%(\s|\n)*$') != ""
+    if matchstr(a:parameters, '\v^%(\s|\n)*$') != ""
         return []
     endif
 
     " Transform each parameter into a line to be used as a doc block
-    let l:paramsList = split(l:parameters, ",")
+    let l:paramsList = split(a:parameters, ",")
 
     let l:params = []
     for i in l:paramsList
@@ -196,7 +191,7 @@ function! s:parseFunctionParameters(parameters)
         if matchstr(i, '\v^[&]{0,1}\$\w+[ ]*[=][ ]*') != ""
             " Get the parameter value
             let l:paramValue = matchlist(i, '\v^[&]{0,1}\$\w+[ ]*[=][ ]*(.*)')
-            let l:paramType = s:getPhpType(l:paramValue[1])
+            let l:paramType = phpdocblocks#getPhpType(l:paramValue[1])
             if l:paramType != ""
                 let i = l:paramType." ".i
             endif
@@ -232,36 +227,6 @@ function! s:parseFunctionParameters(parameters)
 
     return l:params
 
-endfunction
-
-
-" Return PHP type based on the syntax of a string
-function! s:getPhpType(syntax)
-    " Starts with ' or " (string)
-    if matchstr(a:syntax, '\v^''|"') != ""
-        return "string"
-    " A whole number
-    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
-        return "int"
-    " A number with a decimal
-    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
-        return "float"
-    " Is boolean - case insensitive
-    elseif matchstr(a:syntax, '\v\c^true|false$') != ""
-        return "bool"
-    " Matches [] or array() - case insensitive
-    elseif matchstr(a:syntax, '\v\c^\[\]|array\(\)$') != ""
-        return "array"
-    " Null - case insensitive
-    elseif matchstr(a:syntax, '\v\c^null$') != ""
-        return "null"
-    endif
-    return ""
-endfunction
-
-
-function! s:removeArrayContents(string)
-    return substitute(a:string, '\v([\(\[])[^\]\)]*([\]\)])', '\1\2', "g")
 endfunction
 
 
