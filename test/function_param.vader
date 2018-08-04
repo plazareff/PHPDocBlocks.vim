@@ -653,6 +653,132 @@ Expect:
 
 ======================================================
 
+Given (Parameter with default value - array - [] - Associative):
+  public function test($test = ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"])
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - [] - Associative - Multidimensional):
+  public function test($test = ["elementOne" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"]], "elementTwo" => "two", "elementThree" => "three"])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = ["elementOne" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"]], "elementTwo" => "two", "elementThree" => "three"])
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - array() - Associative):
+  public function test($test = array("elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"))
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = array("elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"))
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - array() - Associative - Multidimensional):
+  public function test($test = array("elementOne" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementTwo" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementThree" => "three"))
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = array("elementOne" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementTwo" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementThree" => "three"))
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - array() - Multidimensional):
+  public function test($test = array(array(1,2), array(1,2), array(array(1,2), array(1,2))))
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = array(array(1,2), array(1,2), array(array(1,2), array(1,2))))
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - Mixed: array() and [] - Multidimensional):
+  public function test($test = array(array(1,2), [array(1, 2), array(1, 2)], array([1,2], [1,2])))
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = array(array(1,2), [array(1, 2), array(1, 2)], array([1,2], [1,2])))
+  {
+  }
+
+======================================================
+
 Given (Parameter with default value - array - []):
   public function test($test = ["test",'test2'])
   {
@@ -669,6 +795,27 @@ Expect:
    * @return void
    */
   public function test($test = ["test",'test2'])
+  {
+  }
+
+======================================================
+
+Given (Parameter with default value - array - [] - Multidimensional):
+  public function test($test = [[1], [2], [[1], [2]]])
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @param  array $test
+   * @return void
+   */
+  public function test($test = [[1], [2], [[1], [2]]])
   {
   }
 

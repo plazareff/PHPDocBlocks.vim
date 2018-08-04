@@ -57,6 +57,7 @@ function! phpdocblocks#insert(...)
 
 endfunction
 
+
 " Return PHP type based on the syntax of a string
 function! phpdocblocks#getPhpType(syntax)
     " Starts with ' or " (string)
@@ -85,34 +86,66 @@ function! phpdocblocks#getPhpType(syntax)
     return ""
 endfunction
 
-" Match and replace all arrays with [] - Max depth 10
+
+" Remove everything inside array declarations
 function! s:removeArrayContents(string)
-    let l:arrayRegex1 = '%(%(.{-}array\('
-    let l:arrayRegex2 = '.{-}\))|%(.{-}\['
-    let l:arrayRegex3 = '.{-}\]))*'
-    let l:arrayRegex = ''
-    let l:i = 0
-    while l:i < 10
-        let l:arrayRegex = l:arrayRegex1.l:arrayRegex.l:arrayRegex2.l:arrayRegex.l:arrayRegex3
+    let l:chars = split(a:string, '\zs')
+    let l:string = ""
+    let l:squareDepth = 0
+    let l:roundDepth = 0
+    let l:i = -1
+    for l:char in l:chars
         let l:i += 1
-    endwhile
-    let l:string = substitute(a:string, '\v%(array\(|\[)'.l:arrayRegex.'.{-}%(\)|\])', "[]", "g")
+        if l:char == "["
+            if l:squareDepth == 0 && l:roundDepth == 0
+                let l:string .= l:char
+            endif
+            let l:squareDepth += 1
+            continue
+        elseif l:char == "]" && l:squareDepth != 0
+            if l:squareDepth == 1 && l:roundDepth ==0
+                let l:string .= l:char
+            endif
+            let l:squareDepth -= 1
+            continue
+        elseif l:char == "(" && a:string[l:i-5:l:i-1] == "array"
+            if l:roundDepth == 0 && l:squareDepth == 0
+                let l:string .= l:char
+            endif
+            let l:roundDepth += 1
+            continue
+        elseif l:char == ")" && l:roundDepth != 0
+            if l:roundDepth == 1 && l:squareDepth == 0
+                let l:string .= l:char
+            endif
+            let l:roundDepth -= 1
+            continue
+        endif
+        if l:squareDepth == 0 && l:roundDepth == 0
+            let l:string .= l:char
+        endif
+    endfor
     return l:string
 endfunction
 
-" Removes everything inside parentheses, except other parentheses
+
+" Remove everything inside parentheses
 function! s:removeParenthesesContents(string)
     let l:chars = split(a:string, '\zs')
     let l:string = ""
     let l:depth = 0
     for l:char in l:chars
         if l:char == "("
+            if l:depth == 0
+                let l:string .= l:char
+            endif
             let l:depth += 1
-            let l:string .= l:char
             continue
-        elseif l:char == ')'
+        elseif l:char == ")"
+            if l:depth == 1
+                let l:string .= l:char
+            endif
             let l:depth -= 1
-            let l:string .= l:char
             continue
         endif
         if l:depth == 0
@@ -121,6 +154,7 @@ function! s:removeParenthesesContents(string)
     endfor
     return l:string
 endfunction
+
 
 " Compose a doc block from a template
 function! s:docTemplate(docData, docType)
@@ -219,7 +253,6 @@ function! s:codeWithoutStringContent(type)
                 let l:code .= l:line
             else
                 let l:code .= l:line[0:l:semicolonPosition[2]]
-                let l:code = s:removeParenthesesContents(l:code)
                 break
             endif
         endif
@@ -227,6 +260,9 @@ function! s:codeWithoutStringContent(type)
     endwhile
 
     let l:code = s:removeArrayContents(l:code)
+    if a:type == "variable"
+        let l:code = s:removeParenthesesContents(l:code)
+    endif
     return l:code
 
 endfunction

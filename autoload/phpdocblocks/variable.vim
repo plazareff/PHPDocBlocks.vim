@@ -23,6 +23,7 @@ function! phpdocblocks#variable#parse(codeBlock)
 
 endfunction
 
+
 " Return a single variable
 function! s:singleVariable(variablePart)
     " Use declared type if available
@@ -39,6 +40,7 @@ function! s:singleVariable(variablePart)
     endif
     return l:variable
 endfunction
+
 
 " Return a list of variables
 function! s:multipleVariables(variablePart)

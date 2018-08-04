@@ -290,7 +290,7 @@ Expect:
 
 ======================================================
 
-Given (Variable - Inferred Type - Array - Mixed:  array() and [] - Multidimensional):
+Given (Variable - Inferred Type - Array - Mixed:  array() and [] - Multidimensional - [] first):
   $variable = [array(1,2), [array([1, 2], 2), array(1, 2)], array([1,2], [1,2])];
 
 Execute:
@@ -299,6 +299,54 @@ Execute:
 Expect:
   /** @var array $variable */
   $variable = [array(1,2), [array([1, 2], 2), array(1, 2)], array([1,2], [1,2])];
+
+======================================================
+
+Given (Variable - Inferred Type - Array - [] - Associative):
+  $variable = ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"];
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var array $variable */
+  $variable = ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"];
+
+======================================================
+
+Given (Variable - Inferred Type - Array - [] - Associative - Multidimensional):
+  $variable = ["elementOne" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"]], "elementTwo" => "two", "elementThree" => "three"];
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var array $variable */
+  $variable = ["elementOne" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => ["elementOne" => "one", "elementTwo" => "two", "elementThree" => "three"]], "elementTwo" => "two", "elementThree" => "three"];
+
+======================================================
+
+Given (Variable - Inferred Type - Array - array() - Associative):
+  $variable = array("elementOne" => "one", "elementTwo" => "two", "elementThree" => "three");
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var array $variable */
+  $variable = array("elementOne" => "one", "elementTwo" => "two", "elementThree" => "three");
+
+======================================================
+
+Given (Variable - Inferred Type - Array - array() - Associative - Multidimensional):
+  $variable = array("elementOne" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementTwo" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementThree" => "three");
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var array $variable */
+  $variable = array("elementOne" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementTwo" => array("elementOne" => , "elementTwo" => "two", "elementThree" => "three"), "elementThree" => "three");
 
 ======================================================
 
