@@ -4,6 +4,9 @@ command! -nargs=0 PHPDocBlocks :call phpdocblocks#insert()
 " Add '@return void' to procedures 
 let g:phpdocblocks_return_void = 1
 
+" Move cursor automatically
+let g:phpdocblocks_move_cursor = 1
+
 " Inserts a doc block above the current cursor line
 function! phpdocblocks#insert(...)
 
@@ -53,6 +56,12 @@ function! phpdocblocks#insert(...)
         endfor
         call append((l:cursorLineNum-1), l:indentedOutput)
         "call append((l:cursorLineNum-1), l:code)
+        if(g:phpdocblocks_move_cursor == 1)
+            call cursor(l:cursorLineNum, 0)
+            call search('\v\@.{-}([^(*/)]*|$)', 'e', l:cursorLineNum+10)
+            execute ":startinsert"
+            call cursor(line('.'), col('.')+1)
+        endif
     endif
 
 endfunction
