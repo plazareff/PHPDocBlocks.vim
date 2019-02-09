@@ -15,6 +15,7 @@ function! phpdocblocks#insert(...)
     let l:output = []
     let l:code = ""
 
+    " Function
     if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
         let l:code = s:codeWithoutStringContent("block")
         let l:docData = phpdocblocks#function#parse(l:code)
@@ -23,13 +24,26 @@ function! phpdocblocks#insert(...)
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
+    " Variable
     elseif matchstr(l:cursorLineContent, '\v\${1}\w+') != ""
         let l:code = s:codeWithoutStringContent("variable")
+        let l:code = s:removeParenthesesContents(l:code)
         let l:docData = phpdocblocks#variable#parse(l:code)
         if type(l:docData) == v:t_dict && type(l:docData["variable"]) == v:t_string
             let l:output += s:docTemplate(l:docData, "variable")
         elseif type(l:docData) == v:t_dict && type(l:docData["variable"]) == v:t_list
             let l:output += s:docTemplate(l:docData, "multiple-variables")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
+    " Constant
+    elseif matchstr(l:cursorLineContent, '\vconst\s*\w+|define\(') != ""
+        let l:code = s:codeWithoutStringContent("variable")
+        let l:docData = phpdocblocks#constant#parse(l:code)
+        if type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_string
+            let l:output += s:docTemplate(l:docData, "constant")
+        elseif type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_list
+            let l:output += s:docTemplate(l:docData, "multiple-constants")
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
@@ -216,7 +230,7 @@ function! s:codeWithoutStringContent(type)
         let l:line = getline(l:lineNumber)
         " Remove escaped quotes
         let l:line = substitute(l:line, '\v\\"|\\''', "", "g")
-        " Remove all string content over multiple lines
+        " Remove all string content (except \word characters) over multiple lines
         let l:chars = split(l:line, '\zs')
         let l:line = ""
         for l:char in l:chars
@@ -234,11 +248,15 @@ function! s:codeWithoutStringContent(type)
                 if l:char == "'"
                     let l:isSingleQuoteString = 0
                     let l:line .= "'"
+                elseif matchstr(l:char, '\v\w') != ""
+                    let l:line .= l:char
                 endif
             elseif l:isDoubleQuoteString == 1
                 if l:char == '"'
                     let l:isDoubleQuoteString = 0
                     let l:line .= '"'
+                elseif matchstr(l:char, '\v\w') != ""
+                    let l:line .= l:char
                 endif
             endif
         endfor
@@ -269,9 +287,6 @@ function! s:codeWithoutStringContent(type)
     endwhile
 
     let l:code = s:removeArrayContents(l:code)
-    if a:type == "variable"
-        let l:code = s:removeParenthesesContents(l:code)
-    endif
     return l:code
 
 endfunction
