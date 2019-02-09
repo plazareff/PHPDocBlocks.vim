@@ -83,25 +83,27 @@ endfunction
 
 " Return PHP type based on the syntax of a string
 function! phpdocblocks#getPhpType(syntax)
-    " Starts with ' or " (string)
-    if matchstr(a:syntax, '\v^''|"') != ""
+    " Remove whitespace - not used for Object types
+    let l:syntax = substitute(a:syntax, '\v\s*', "", "g")
+    " Starts and ends with ' or " (string)
+    if matchstr(l:syntax, '\v^''|"$') != ""
         return "string"
     " A whole number
-    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
+    elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
         return "int"
     " A number with a decimal
-    elseif matchstr(a:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
+    elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
         return "float"
     " Is boolean - case insensitive
-    elseif matchstr(a:syntax, '\v\c^true|false$') != ""
+    elseif matchstr(l:syntax, '\v\c^true|false$') != ""
         return "bool"
     " Matches [] or array() - case insensitive
-    elseif matchstr(a:syntax, '\v\c^\[\]|array\(\)$') != ""
+    elseif matchstr(l:syntax, '\v\c^\[\]|array\(\)$') != ""
         return "array"
     " Null - case insensitive
-    elseif matchstr(a:syntax, '\v\c^null$') != ""
+    elseif matchstr(l:syntax, '\v\c^null$') != ""
         return "null"
-    " Object instantiation - case insensitive
+    " Object instantiation - case insensitive - no whitespace removed
     elseif matchstr(a:syntax, '\v\c^new \w+') != ""
         let l:instantiation = matchlist(a:syntax, '\v\c^new (\w+)')
         return l:instantiation[1]

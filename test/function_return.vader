@@ -637,3 +637,25 @@ Expect:
   {
       return NULL;
   }
+
+======================================================
+
+Given (Return function - String as parameter):
+  public function test()
+  {
+      return myFunction("string");
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return 
+   */
+  public function test()
+  {
+      return myFunction("string");
+  }

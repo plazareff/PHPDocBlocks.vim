@@ -670,3 +670,4 @@ Execute:
 Expect:
   /** @var $test */
   $test = myFunction(myFunction2("test", 0, myFunction3("test", 0)), 'test', 0, "for");
+
