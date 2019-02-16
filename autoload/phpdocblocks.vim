@@ -17,7 +17,7 @@ function! phpdocblocks#insert(...)
     let l:code = ""
 
     " Function
-    if matchstr(l:cursorLineContent, '\v\s*%(private|public|protected)*\s*function%($|\s)+') != "" || matchstr(l:nextLineContent, '\v^\s*function') != ""
+    if matchstr(l:cursorLineContent, '\vfunction%($|\s)+') != "" || (matchstr(l:cursorLineContent, '\v%(private|public|protected)%($|\s)+') != "" && matchstr(l:nextLineContent, '\vfunction%($|\s)+') != "")
         let l:code = s:codeWithoutStringContent("block")
         let l:docData = phpdocblocks#function#parse(l:code)
         if type(l:docData) == v:t_dict
@@ -38,7 +38,7 @@ function! phpdocblocks#insert(...)
             let l:output += l:docData
         endif
     " Constant
-    elseif matchstr(l:cursorLineContent, '\vconst\s*\w+|define\(') != ""
+    elseif matchstr(l:cursorLineContent, '\vconst%($|\s)+|define\(') != "" || (matchstr(l:cursorLineContent, '\v%(private|public|protected)%($|\s)+') != "" && matchstr(l:nextLineContent, '\vconst%($|\s)+') != "")
         let l:code = s:codeWithoutStringContent("variable")
         let l:docData = phpdocblocks#constant#parse(l:code)
         if type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_string

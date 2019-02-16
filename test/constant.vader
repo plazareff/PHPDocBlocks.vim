@@ -2,6 +2,82 @@
 
 ======================================================
 
+Given (Constant - const - public):
+  public const TEST = "string";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string TEST */
+  public const TEST = "string";
+
+======================================================
+
+Given (Constant - const - private):
+  private const TEST = "string";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string TEST */
+  private const TEST = "string";
+
+======================================================
+
+Given (Constant - const - protected):
+  protected const TEST = "string";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string TEST */
+  protected const TEST = "string";
+
+======================================================
+
+Given (Constant - const - keywords on new lines):
+  protected
+  const
+  TEST
+  =
+  "string";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string TEST */
+  protected
+  const
+  TEST
+  =
+  "string";
+
+======================================================
+
+Given (Constant - const - keywords on new lines with whitespace):
+  protected    
+           const
+                 TEST
+    =
+  "string";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string TEST */
+  protected    
+           const
+                 TEST
+    =
+  "string";
+
+======================================================
+
 Given (Constant - const - Multiple):
   const TEST_INT = 34,
         TEST_ARRAY = array("a", "b", "c"),
