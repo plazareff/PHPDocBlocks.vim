@@ -1,0 +1,210 @@
+" TODO:
+
+======================================================
+
+Given (Class):
+  class Foo {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class Foo {
+
+  }
+
+======================================================
+
+Given (Class - class keyword in string):
+  class Foo {
+    private string $class = "class";
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class Foo {
+    private string $class = "class";
+  }
+
+======================================================
+
+Given (Class - Opening brace on a new line):
+  class Foo
+  {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class Foo
+  {
+
+  }
+
+======================================================
+
+Given (Class - New Lines between keywords):
+  class
+  Foo
+  {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class
+  Foo
+  {
+
+  }
+
+======================================================
+
+Given (Class - New Lines and whitespace between keywords):
+  class      
+             Foo   
+    {       
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class      
+             Foo   
+    {       
+
+  }
+
+======================================================
+
+Given (Class - Whitespace between keywords):
+  class      Foo                 {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  class      Foo                 {
+
+  }
+
+======================================================
+
+Given (Class - extends):
+  class Foo extends Bar {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   */
+  class Foo extends Bar {
+
+  }
+
+======================================================
+
+Given (Class - extends - keywords on new lines):
+  class
+  Foo
+  extends
+  Bar
+  {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   */
+  class
+  Foo
+  extends
+  Bar
+  {
+
+  }
+
+======================================================
+
+Given (Class - extends - keywords on new lines with whitespace):
+  class     
+      Foo
+         extends   
+  Bar
+       {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   */
+  class     
+      Foo
+         extends   
+  Bar
+       {
+
+  }

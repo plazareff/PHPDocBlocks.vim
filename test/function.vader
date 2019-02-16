@@ -22,6 +22,58 @@ Expect:
 
 ======================================================
 
+Given (Procedure - no return - new lines between keywords):
+  public
+  function
+  test
+  ()
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  public
+  function
+  test
+  ()
+  {
+  }
+
+======================================================
+
+Given (Procedure - no return - new lines and whitespace between keywords):
+      public      
+        function
+     test     
+    (   )  
+   {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+      /**
+       * test
+       *
+       * @return void
+       */
+      public      
+        function
+     test     
+    (   )  
+   {
+  }
+
+======================================================
+
 Given (Function - nested braces):
   public function test()
   {

@@ -11,12 +11,13 @@ let g:phpdocblocks_move_cursor = 1
 function! phpdocblocks#insert(...)
 
     let l:cursorLineContent = getline('.')
+    let l:nextLineContent = getline(line('.')+1)
     let l:cursorLineNum = line('.')
     let l:output = []
     let l:code = ""
 
     " Function
-    if matchstr(l:cursorLineContent, '\vfunction(\s|$)+') != ""
+    if matchstr(l:cursorLineContent, '\v\s*%(private|public|protected)*\s*function%($|\s)+') != "" || matchstr(l:nextLineContent, '\v^\s*function') != ""
         let l:code = s:codeWithoutStringContent("block")
         let l:docData = phpdocblocks#function#parse(l:code)
         if type(l:docData) == v:t_dict
@@ -44,6 +45,15 @@ function! phpdocblocks#insert(...)
             let l:output += s:docTemplate(l:docData, "constant")
         elseif type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_list
             let l:output += s:docTemplate(l:docData, "multiple-constants")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
+    " Class
+    elseif matchstr(l:cursorLineContent, '\vclass%($|\s)+') != ""
+        let l:code = s:codeWithoutStringContent("block")
+        let l:docData = phpdocblocks#class#parse(l:code)
+        if type(l:docData) == v:t_dict
+            let l:output += s:docTemplate(l:docData, "class")
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
@@ -207,6 +217,7 @@ function! s:transformTemplateLine(docData, tagName, templateLine)
         let l:lineRegex = '\v^(.{-})\{\{[ ]*'.a:tagName.'[ ]*\}\}(.{-})$'
         let l:linePart = matchlist(a:templateLine, l:lineRegex)
         if type(a:docData[a:tagName]) == v:t_list
+            " Will not write template lines which have empty lists for tag data
             for l:data in a:docData[a:tagName]
                 call add(l:output, l:linePart[1].l:data.l:linePart[2])
             endfor
@@ -272,7 +283,8 @@ function! s:codeWithoutStringContent(type)
             if l:closingBraceCount > 0
                 let l:blockDepth -= l:closingBraceCount
             endif
-            let l:code .= l:line
+            " Add the line to the code block with a space instead of a new line
+            let l:code .= l:line . " "
             if l:blockDepth == 0 && l:closingBraceCount > 0
                 break
             endif
