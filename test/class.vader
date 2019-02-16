@@ -22,6 +22,46 @@ Expect:
 
 ======================================================
 
+Given (Class - final):
+  final class Foo {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  final class Foo {
+
+  }
+
+======================================================
+
+Given (Class - abstract):
+  abstract class Foo {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  abstract class Foo {
+
+  }
+
+======================================================
+
 Given (Class - class keyword in string):
   class Foo {
     private string $class = "class";
