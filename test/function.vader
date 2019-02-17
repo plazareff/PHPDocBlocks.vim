@@ -22,6 +22,48 @@ Expect:
 
 ======================================================
 
+Given (Function - return string - multiple opening/closing braces on the same line):
+  public function test()
+  { if() {
+    } elseif() {
+  } return "success"; }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return string
+   */
+  public function test()
+  { if() {
+    } elseif() {
+  } return "success"; }
+
+======================================================
+
+Given (Procedure - no return - mixed case keywords):
+  pUbLIc fUnCtIoN test()
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  pUbLIc fUnCtIoN test()
+  {
+  }
+
+======================================================
+
 Given (Procedure - no return - new lines between keywords):
   public
   function

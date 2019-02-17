@@ -22,6 +22,27 @@ Expect:
 
 ======================================================
 
+Given (Class - uppercase keywords):
+  ABSTRACT CLASS Foo EXTENDS Bar {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   */
+  ABSTRACT CLASS Foo EXTENDS Bar {
+
+  }
+
+======================================================
+
 Given (Class - final):
   final class Foo {
 
@@ -57,6 +78,96 @@ Expect:
    * @author John Doe <email@example.com>
    */
   abstract class Foo {
+
+  }
+
+======================================================
+
+Given (Class - final - Keywords on multiple lines):
+  final
+
+  class
+
+  Foo
+
+  {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  final
+
+  class
+
+  Foo
+
+  {
+
+  }
+
+======================================================
+
+Given (Class - abstract - Keywords on multiple lines):
+  abstract
+  class
+  Foo
+  {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   */
+  abstract
+  class
+  Foo
+  {
+
+  }
+
+======================================================
+
+Given (Class - abstract - Keywords on multiple lines with whitespace):
+    abstract   
+
+            class
+
+                 Foo  
+
+   {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+    /**
+     * Foo
+     *
+     * @author John Doe <email@example.com>
+     */
+    abstract   
+
+            class
+
+                 Foo  
+
+   {
 
   }
 

@@ -7,27 +7,37 @@ let g:phpdocblocks_return_void = 1
 " Move cursor automatically
 let g:phpdocblocks_move_cursor = 1
 
+
 " Inserts a doc block above the current cursor line
 function! phpdocblocks#insert(...)
 
-    let l:cursorLineContent = getline('.')
-    let l:nextLineContent = getline(line('.')+1)
+    let l:declarationLines = s:getUntilCharacter( ["{",";"] )
     let l:cursorLineNum = line('.')
     let l:output = []
+    "let l:output += [l:declarationLines]
     let l:code = ""
 
     " Function
-    if matchstr(l:cursorLineContent, '\vfunction%($|\s)+') != "" || (matchstr(l:cursorLineContent, '\v%(private|public|protected)%($|\s)+') != "" && matchstr(l:nextLineContent, '\vfunction%($|\s)+') != "")
-        let l:code = s:codeWithoutStringContent("block")
+    if matchstr(l:declarationLines, '\vfunction\s+') != ""
+        let l:code = s:getCode("block")
         let l:docData = phpdocblocks#function#parse(l:code)
         if type(l:docData) == v:t_dict
             let l:output += s:docTemplate(l:docData, "function")
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
+    " Class
+    elseif matchstr(l:declarationLines, '\vclass\s+') != ""
+        let l:code = s:getCode("block")
+        let l:docData = phpdocblocks#class#parse(l:code)
+        if type(l:docData) == v:t_dict
+            let l:output += s:docTemplate(l:docData, "class")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
     " Variable
-    elseif matchstr(l:cursorLineContent, '\v\${1}\w+') != ""
-        let l:code = s:codeWithoutStringContent("variable")
+    elseif matchstr(l:declarationLines, '\v\${1}\w+%(;|\s)+') != ""
+        let l:code = s:getCode("variable")
         let l:code = s:removeParenthesesContents(l:code)
         let l:docData = phpdocblocks#variable#parse(l:code)
         if type(l:docData) == v:t_dict && type(l:docData["variable"]) == v:t_string
@@ -38,22 +48,13 @@ function! phpdocblocks#insert(...)
             let l:output += l:docData
         endif
     " Constant
-    elseif matchstr(l:cursorLineContent, '\vconst%($|\s)+|define\(') != "" || (matchstr(l:cursorLineContent, '\v%(private|public|protected)%($|\s)+') != "" && matchstr(l:nextLineContent, '\vconst%($|\s)+') != "")
-        let l:code = s:codeWithoutStringContent("variable")
+    elseif matchstr(l:declarationLines, '\vconst\s+|define\(') != ""
+        let l:code = s:getCode("variable")
         let l:docData = phpdocblocks#constant#parse(l:code)
         if type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_string
             let l:output += s:docTemplate(l:docData, "constant")
         elseif type(l:docData) == v:t_dict && type(l:docData["constant"]) == v:t_list
             let l:output += s:docTemplate(l:docData, "multiple-constants")
-        elseif type(l:docData) == v:t_list
-            let l:output += l:docData
-        endif
-    " Class
-    elseif matchstr(l:cursorLineContent, '\vclass%($|\s)+') != ""
-        let l:code = s:codeWithoutStringContent("block")
-        let l:docData = phpdocblocks#class#parse(l:code)
-        if type(l:docData) == v:t_dict
-            let l:output += s:docTemplate(l:docData, "class")
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
@@ -88,6 +89,116 @@ function! phpdocblocks#insert(...)
         endif
     endif
 
+endfunction
+
+
+" Return the code as a string
+function! s:getCode(type)
+    let l:code = ""
+    let l:blockDepth = 0
+    let l:lineNumber = line('.')
+    let l:totalLinesInDocument = line('$')
+    let l:isDoubleQuoteString = 0
+    let l:isSingleQuoteString = 0
+    while l:lineNumber <= l:totalLinesInDocument
+        let l:line = s:removeStringContent(l:lineNumber)
+        if a:type == "block"
+            " Find the closing brace for the code block
+            let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
+            if l:openingBraceCount > 0
+                let l:blockDepth += l:openingBraceCount
+            endif
+            let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
+            if l:closingBraceCount > 0
+                let l:blockDepth -= l:closingBraceCount
+            endif
+            " Add the line to the code block with a space instead of a new line
+            let l:code .= l:line . " "
+            if l:blockDepth == 0 && l:closingBraceCount > 0
+                break
+            endif
+        elseif a:type == "variable"
+            let l:semicolonPosition = matchstrpos(l:line, ";")
+            if l:semicolonPosition[2] == -1
+                let l:code .= l:line
+            else
+                let l:code .= l:line[0:l:semicolonPosition[2]]
+                break
+            endif
+        endif
+        let l:lineNumber += 1
+    endwhile
+    let l:code = s:removeArrayContents(l:code)
+    return l:code
+endfunction
+
+
+" Script scope variables allow the content of multiple line PHP strings to be cleared
+let s:isDoubleQuoteString = 0
+let s:isSingleQuoteString = 0
+" Remove PHP string content
+function! s:removeStringContent(lineNumber)
+    let l:line = getline(a:lineNumber)
+    " Remove escaped quotes
+    let l:line = substitute(l:line, '\v\\"|\\''', "", "g")
+    " Remove all string content over multiple lines
+    let l:chars = split(l:line, '\zs')
+    let l:line = ""
+    for l:char in l:chars
+        if s:isSingleQuoteString == 0 && s:isDoubleQuoteString == 0
+            if l:char == "'"
+                let s:isSingleQuoteString = 1
+                let l:line .= "'"
+            elseif l:char == '"'
+                let s:isDoubleQuoteString = 1
+                let l:line .= '"'
+            else
+                let l:line .= l:char
+            endif
+        elseif s:isSingleQuoteString == 1
+            if l:char == "'"
+                let s:isSingleQuoteString = 0
+                let l:line .= "'"
+            " Keep \w characters for PHP define() constant names, it is
+            " important to not keep spaces though, as PHP keywords may get
+            " detected
+            elseif matchstr(l:char, '\v\w') != ""
+                let l:line .= l:char
+            endif
+        elseif s:isDoubleQuoteString == 1
+            if l:char == '"'
+                let s:isDoubleQuoteString = 0
+                let l:line .= '"'
+            " Keep \w characters for PHP define() constant names, it is
+            " important to not keep spaces though, as PHP keywords may get
+            " detected
+            elseif matchstr(l:char, '\v\w') != ""
+                let l:line .= l:char
+            endif
+        endif
+    endfor
+    " Avoid concatenating PHP keywords directly together by adding a space
+    return l:line . " "
+endfunction
+
+
+" Get code starting from the line the cursor is on until a certain character is reached
+function! s:getUntilCharacter(characters)
+    let l:lineNumber = line('.')
+    let l:totalLinesInDocument = line('$')
+    let l:code = ""
+    let l:line = ""
+    while l:lineNumber <= l:totalLinesInDocument
+        let l:line = s:removeStringContent(l:lineNumber)
+        let l:code .= l:line
+        for l:character in a:characters
+            if matchstr(l:line, l:character) != ""
+                let l:lineNumber = line('$')
+            endif
+        endfor
+        let l:lineNumber += 1
+    endwhile
+    return l:code
 endfunction
 
 
@@ -229,78 +340,3 @@ function! s:transformTemplateLine(docData, tagName, templateLine)
 endfunction
 
 
-" Return the code block as a string
-function! s:codeWithoutStringContent(type)
-
-    let l:code = ""
-    let l:blockDepth = 0
-    let l:lineNumber = line('.')
-    let l:totalLinesInDocument = line('$')
-    let l:isDoubleQuoteString = 0
-    let l:isSingleQuoteString = 0
-
-    while l:lineNumber <= l:totalLinesInDocument
-        let l:line = getline(l:lineNumber)
-        " Remove escaped quotes
-        let l:line = substitute(l:line, '\v\\"|\\''', "", "g")
-        " Remove all string content (except \word characters) over multiple lines
-        let l:chars = split(l:line, '\zs')
-        let l:line = ""
-        for l:char in l:chars
-            if l:isSingleQuoteString == 0 && l:isDoubleQuoteString == 0
-                if l:char == "'"
-                    let l:isSingleQuoteString = 1
-                    let l:line .= "'"
-                elseif l:char == '"'
-                    let l:isDoubleQuoteString = 1
-                    let l:line .= '"'
-                else
-                    let l:line .= l:char
-                endif
-            elseif l:isSingleQuoteString == 1
-                if l:char == "'"
-                    let l:isSingleQuoteString = 0
-                    let l:line .= "'"
-                elseif matchstr(l:char, '\v\w') != ""
-                    let l:line .= l:char
-                endif
-            elseif l:isDoubleQuoteString == 1
-                if l:char == '"'
-                    let l:isDoubleQuoteString = 0
-                    let l:line .= '"'
-                elseif matchstr(l:char, '\v\w') != ""
-                    let l:line .= l:char
-                endif
-            endif
-        endfor
-        if a:type == "block"
-            " Find the closing brace for the code block
-            let l:openingBraceCount = len(split(l:line, '\v\{', 1)) - 1
-            if l:openingBraceCount > 0
-                let l:blockDepth += l:openingBraceCount
-            endif
-            let l:closingBraceCount = len(split(l:line, '\v\}', 1)) - 1
-            if l:closingBraceCount > 0
-                let l:blockDepth -= l:closingBraceCount
-            endif
-            " Add the line to the code block with a space instead of a new line
-            let l:code .= l:line . " "
-            if l:blockDepth == 0 && l:closingBraceCount > 0
-                break
-            endif
-        elseif a:type == "variable"
-            let l:semicolonPosition = matchstrpos(l:line, ";")
-            if l:semicolonPosition[2] == -1
-                let l:code .= l:line
-            else
-                let l:code .= l:line[0:l:semicolonPosition[2]]
-                break
-            endif
-        endif
-        let l:lineNumber += 1
-    endwhile
-
-    let l:code = s:removeArrayContents(l:code)
-    return l:code
-
-endfunction

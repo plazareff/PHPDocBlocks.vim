@@ -26,6 +26,56 @@ Expect:
 
 ======================================================
 
+Given (Variable - Public - String - Defined over multiple lines):
+  public
+  $variable
+
+  =
+
+  "This{
+
+  is a
+
+  string;
+
+  "
+
+  ;
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string $variable */
+  public
+  $variable
+
+  =
+
+  "This{
+
+  is a
+
+  string;
+
+  "
+
+  ;
+
+======================================================
+
+Given (Variable - Public - String - String contains PHP keywords):
+  public $variable = "class function const define(";
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var string $variable */
+  public $variable = "class function const define(";
+
+======================================================
+
 Given (Variable - Property - No Type - No Value - Public):
   public $variable;
 
