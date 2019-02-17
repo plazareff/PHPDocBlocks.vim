@@ -7,6 +7,9 @@ let g:phpdocblocks_return_void = 1
 " Move cursor automatically
 let g:phpdocblocks_move_cursor = 1
 
+" Use abbreviated type names (bool/boolean and int/integer)
+let g:phpdocblocks_abbreviate_types = 1
+
 
 " Inserts a doc block above the current cursor line
 function! phpdocblocks#insert(...)
@@ -211,13 +214,21 @@ function! phpdocblocks#getPhpType(syntax)
         return "string"
     " A whole number
     elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
-        return "int"
+        if g:phpdocblocks_abbreviate_types == 0
+            return "integer"
+        else
+            return "int"
+        endif
     " A number with a decimal
     elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
         return "float"
     " Is boolean - case insensitive
     elseif matchstr(l:syntax, '\v\c^true|false$') != ""
-        return "bool"
+        if g:phpdocblocks_abbreviate_types == 0
+            return "boolean"
+        else
+            return "bool"
+        endif
     " Matches [] or array() - case insensitive
     elseif matchstr(l:syntax, '\v\c^\[\]|array\(\)$') != ""
         return "array"
