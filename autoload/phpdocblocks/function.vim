@@ -1,7 +1,7 @@
 " Return a list of lines that make up the doc block
 function! phpdocblocks#function#parse(codeBlock)
     " Match a valid function syntax, capture the name and parameters
-    let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)[:]{0,1}%(\s|\n)*%(\w*|[?]\w*)%(\s|\n)*\{'
+    let l:functionPartsRegex = '\vfunction%(\s|\n)+(\S+)%(\s|\n)*\((.{-})\)%(\s|\n)*[:]{0,1}%(\s|\n)*%(\w*|[?]\w*)%(\s|\n)*\{'
     let l:functionParts = matchlist(a:codeBlock, l:functionPartsRegex)
     if l:functionParts != []
         let l:parameters = l:functionParts[2]
@@ -22,9 +22,10 @@ endfunction
 " Returns the return type
 function! s:parseFunctionReturn(codeBlock)
 
-    let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)[:]{0,1}%(\s|\n)*(\w*|[?]\w*)%(\s|\n)*\{'
+    let l:declaredReturnRegex = '\vfunction%(\s|\n)+%(\S+)%(\s|\n)*\(%(.{-})\)%(\s|\n)*[:]{0,1}%(\s|\n)*(\w*|[?]\w*)%(\s|\n)*\{'
     let l:declaredReturn = matchlist(a:codeBlock, l:declaredReturnRegex)
     if l:declaredReturn[1] != ""
+        let l:declaredReturn[1] = phpdocblocks#setTypeAbbreviation(l:declaredReturn[1])
         " Return type nullable?
         if l:declaredReturn[1][0] == "?"
             return l:declaredReturn[1][1:]."|null"
@@ -183,6 +184,7 @@ function! s:parseFunctionParameters(parameters)
 
     let l:params = []
     for i in l:paramsList
+
         " Convert all whitespace and new lines to a single space globally
         let i = substitute(i, '\v(\s|\n)+', " ", "g")
         " Strip leading and trailing spaces
@@ -196,22 +198,31 @@ function! s:parseFunctionParameters(parameters)
                 let i = l:paramType." ".i
             endif
         endif
+
         " Determine if the parameter is nullable and not defined as nullable
         " with a ? in front of the type hint
         if matchstr(i, '\v\c^[&]{0,1}\w+[ ]*[$]\w+[ ]*[=][ ]*null[ ]*$') != ""
             let i = "?".i
         endif
+
         " Remove everything from '=' to the end of line
         let i = substitute(i, '\v[ ]*[=][ ]*(.{-})[ ]*$', "", "")
-        "if ? on front of the typehint it is a nullable parameter
-        if i[0] == "?"
-            let l:paramParts = matchlist(i, '\v(^[?][&]{0,1}\w*)([ ]*[$]\w*)')
-            if l:paramParts[1] != "?null"
-                let i = l:paramParts[1][1:]."|null".l:paramParts[2]
-            else
-                let i = i[1:]
+
+        " Get the type hint and the parameter name
+        let l:paramParts = matchlist(i, '\v(^[?]{0,1}[&]{0,1}\w+)\s*([$]\w*)')
+        if l:paramParts != []
+            " Set abbreviation for type when a type hint is declared
+            let i = phpdocblocks#setTypeAbbreviation(l:paramParts[1]) . " " . l:paramParts[2]
+            " If ? on front of the typehint it is a nullable parameter
+            if i[0] == "?"
+                if l:paramParts[1] != "?null"
+                    let i = l:paramParts[1][1:]."|null ".l:paramParts[2]
+                else
+                    let i = i[1:]
+                endif
             endif
         endif
+
         " Function contains variable arguments (...$args)
         if matchstr(i, '\v\.\.\.\$') != ""
             " Remove ... from start then add to end with a comma

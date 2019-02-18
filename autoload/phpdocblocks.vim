@@ -205,6 +205,20 @@ function! s:getUntilCharacter(characters)
 endfunction
 
 
+" Use full type name or abbreviated type name (int/integer, bool/boolean)
+function! phpdocblocks#setTypeAbbreviation(type)
+    let l:type = a:type
+    if g:phpdocblocks_abbreviate_types
+        let l:type = substitute(l:type,  '\v^integer$', 'int', "")
+        let l:type = substitute(l:type, '\v^boolean$', 'bool', "")
+    else
+        let l:type = substitute(l:type,  '\v^int$', 'integer', "")
+        let l:type = substitute(l:type, '\v^bool$', 'boolean', "")
+    endif
+    return l:type
+endfunction
+
+
 " Return PHP type based on the syntax of a string
 function! phpdocblocks#getPhpType(syntax)
     " Remove whitespace - not used for Object types
@@ -214,21 +228,13 @@ function! phpdocblocks#getPhpType(syntax)
         return "string"
     " A whole number
     elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+$') != ""
-        if g:phpdocblocks_abbreviate_types == 0
-            return "integer"
-        else
-            return "int"
-        endif
+        return phpdocblocks#setTypeAbbreviation("int")
     " A number with a decimal
     elseif matchstr(l:syntax, '\v^[-+]{0,1}[0-9]+\.[0-9]+$') != ""
         return "float"
     " Is boolean - case insensitive
     elseif matchstr(l:syntax, '\v\c^true|false$') != ""
-        if g:phpdocblocks_abbreviate_types == 0
-            return "boolean"
-        else
-            return "bool"
-        endif
+        return phpdocblocks#setTypeAbbreviation("bool")
     " Matches [] or array() - case insensitive
     elseif matchstr(l:syntax, '\v\c^\[\]|array\(\)$') != ""
         return "array"
@@ -349,5 +355,3 @@ function! s:transformTemplateLine(docData, tagName, templateLine)
     endif
     return l:output
 endfunction
-
-

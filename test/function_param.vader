@@ -1043,7 +1043,7 @@ Expect:
   /**
    * test
    *
-   * @param  integer $test
+   * @param  int $test
    * @return void
    */
   public function test(integer $test)
@@ -1106,7 +1106,7 @@ Expect:
   /**
    * test
    *
-   * @param  boolean $test
+   * @param  bool $test
    * @return void
    */
   public function test(boolean $test)

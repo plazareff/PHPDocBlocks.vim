@@ -28,7 +28,7 @@ endfunction
 function! s:singleVariable(variablePart)
     " Use declared type if available
     if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cpublic|protected|private') == ""
-        let l:variable = a:variablePart[1]." $".a:variablePart[2]
+        let l:variable = phpdocblocks#setTypeAbbreviation(a:variablePart[1])." $".a:variablePart[2]
     else
         " Get variable type from value
         let l:variableType = phpdocblocks#getPhpType(a:variablePart[3])
@@ -56,7 +56,7 @@ function! s:multipleVariables(variablePart)
         endif
         " Use declared type if available
         if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cpublic|protected|private') == ""
-            let l:multipleVariableType = a:variablePart[1]
+            let l:multipleVariableType = phpdocblocks#setTypeAbbreviation(a:variablePart[1])
         endif
         while l:i < len(l:multipleVariables)
             if l:multipleVariableType != ""
