@@ -27,7 +27,7 @@ endfunction
 " Return a single variable
 function! s:singleVariable(variablePart)
     " Use declared type if available
-    if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cpublic|protected|private') == ""
+    if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cstatic|public|protected|private') == ""
         let l:variable = phpdocblocks#setTypeAbbreviation(a:variablePart[1])." $".a:variablePart[2]
     else
         " Get variable type from value
@@ -55,7 +55,7 @@ function! s:multipleVariables(variablePart)
             call remove(l:multipleVariables, len(l:multipleVariables)-1)
         endif
         " Use declared type if available
-        if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cpublic|protected|private') == ""
+        if a:variablePart[1] != "" && matchstr(a:variablePart[1], '\v\cstatic|public|protected|private') == ""
             let l:multipleVariableType = phpdocblocks#setTypeAbbreviation(a:variablePart[1])
         endif
         while l:i < len(l:multipleVariables)

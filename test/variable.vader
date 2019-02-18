@@ -88,6 +88,54 @@ Expect:
 
 ======================================================
 
+Given (Variable - No Type - Static):
+  static $variable = $var;
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var $variable */
+  static $variable = $var;
+
+======================================================
+
+Given (Variable - int - Static):
+  static int $variable = $var;
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var int $variable */
+  static int $variable = $var;
+
+======================================================
+
+Given (Variable - No Type - Public - Static):
+  public static $variable = $var;
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var $variable */
+  public static $variable = $var;
+
+======================================================
+
+Given (Variable - int - Public - Static):
+  public static int $variable = $var;
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /** @var int $variable */
+  public static int $variable = $var;
+
+======================================================
+
 Given (Variable - No Type - Public):
   public $variable = $var;
 

@@ -22,6 +22,46 @@ Expect:
 
 ======================================================
 
+Given (Procedure - no return - static):
+  static function test()
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  static function test()
+  {
+  }
+
+======================================================
+
+Given (Procedure - no return - public - static):
+  public static function test()
+  {
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * test
+   *
+   * @return void
+   */
+  public static function test()
+  {
+  }
+
+======================================================
+
 Given (Function - return string - multiple opening/closing braces on the same line):
   public function test()
   { if() {
