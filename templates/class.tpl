@@ -5,7 +5,7 @@
  * {{name}}
  *
  * @author John Doe <email@example.com>
- * @see {{parent-class}}
+ * @see {{parent}}
  */
 
 
@@ -14,5 +14,5 @@
 #  * {{name}}
 #  *
 #  * @author John Doe <email@example.com>
-#  * @see {{parent-class}}
+#  * @see {{parent}}
 #  */

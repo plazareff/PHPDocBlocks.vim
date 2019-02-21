@@ -193,6 +193,27 @@ Expect:
 
 ======================================================
 
+Given (Class - implements):
+  class Foo implements BarInterface {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see BarInterface
+   */
+  class Foo implements BarInterface {
+
+  }
+
+======================================================
+
 Given (Class - Opening brace on a new line):
   class Foo
   {
