@@ -1,18 +1,40 @@
-" Return a list of lines that make up the doc block
+" Return a vimscript dictionary of the class name,
+" the parent class name and the interfaces it implements
 function! phpdocblocks#class#parse(code)
-    " Match a valid function syntax, capture the name and parameters
-    let l:classPartsRegex = '\vclass%(\s|\n)+(\w+)%(\s|\n)*%(extends|implements){0,1}%(\s|\n)*(\w*)%(\s|\n)*\{'
-    let l:classParts = matchlist(a:code, l:classPartsRegex)
-    if l:classParts != []
-        let l:name = l:classParts[1]
-        if l:classParts[2] != ""
-            let l:parent = l:classParts[2]
-        else
-            " Will not write the template line for an empty list
-            let l:parent = []
-        endif
-    else
-        return ["error","Invalid PHP class declaration on this line."]
+
+    " Match a valid class syntax
+    " Capture the class name, the inherited class name and the interfaces it implements
+    let l:classNameRegex = 'class%(\s|\n)+(\w+)%(\s|\n)*'
+    let l:extendsRegex = '%(%(extends)%(\s|\n)*(\w*)%(\s|\n)*){0,1}'
+    let l:implementsRegex = '%(%(implements)%(\s|\n)*(.{-})%(\s|\n)*){0,1}'
+    let l:parts = matchlist(a:code, '\v' . l:classNameRegex . l:extendsRegex . l:implementsRegex . '\{')
+
+    " Invalid class syntax
+    if l:parts == []
+        return ["error", "Invalid PHP class declaration on this line."]
     endif
-    return {'name': l:name, 'parent': l:parent}
+
+    " Remove whitespace from the parent class name
+    let l:parent = substitute(l:parts[2], '\v%(\s|\n)*', "", "g")
+
+    " No parent class (empty list will omit the entire template line)
+    if l:parent == ""
+        let l:parent = []
+    endif
+
+    " Remove whitespace from the interface name(s)
+    let l:interface = substitute(l:parts[3], '\v%(\s|\n)*', "", "g")
+
+    " No interfaces (empty list will omit the entire template line)
+    if l:interface == ""
+        let l:interface = []
+    endif
+
+    " Multiple interfaces
+    if matchstr(l:interface, ",") != ""
+        let l:interface = split(l:interface, ",")
+    endif
+
+    return {'name': l:parts[1], 'parent': l:parent, 'interface': l:interface}
+
 endfunction

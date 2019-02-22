@@ -38,6 +38,15 @@ function! phpdocblocks#insert(...)
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
+    " Interface
+    elseif matchstr(l:declarationLines, '\vinterface\s+') != ""
+        let l:code = s:getCode("block")
+        let l:docData = phpdocblocks#interface#parse(l:code)
+        if type(l:docData) == v:t_dict
+            let l:output += s:docTemplate(l:docData, "interface")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
     " Variable
     elseif matchstr(l:declarationLines, '\v\${1}\w+%(;|\s)+') != ""
         let l:code = s:getCode("variable")
@@ -65,7 +74,7 @@ function! phpdocblocks#insert(...)
         let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
     endif
 
-    if l:output[0] == 'error'
+    if l:output != [] && l:output[0] == "error"
         " Errors while testing need to be output to the buffer
         if a:0 > 0 && a:1 == "test"
             call append((l:cursorLineNum-1), "====== ERROR ======")

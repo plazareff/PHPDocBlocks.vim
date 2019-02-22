@@ -214,6 +214,124 @@ Expect:
 
 ======================================================
 
+Given (Class - implements - multiple - two):
+  class Foo implements BarInterface, BazInterface {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see BarInterface
+   * @see BazInterface
+   */
+  class Foo implements BarInterface, BazInterface {
+
+  }
+
+======================================================
+
+Given (Class - implements - multiple - five):
+  class Foo implements Ione, Itwo, Ithree, Ifour, Ifive {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Ione
+   * @see Itwo
+   * @see Ithree
+   * @see Ifour
+   * @see Ifive
+   */
+  class Foo implements Ione, Itwo, Ithree, Ifour, Ifive {
+
+  }
+
+======================================================
+
+Given (Class - extends and implements):
+  class Foo extends Bar implements BarInterface {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   * @see BarInterface
+   */
+  class Foo extends Bar implements BarInterface {
+
+  }
+
+======================================================
+
+Given (Class - extends and implements - multiple - two):
+  class Foo extends Bar implements BarInterface, BazInterface {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   * @see BarInterface
+   * @see BazInterface
+   */
+  class Foo extends Bar implements BarInterface, BazInterface {
+
+  }
+
+======================================================
+
+Given (Class - extends and implements - multiple - five):
+  class Foo extends Bar implements Ione, Itwo, Ithree, Ifour, Ifive {
+
+  }
+
+Execute:
+  call phpdocblocks#insert("test")
+
+Expect:
+  /**
+   * Foo
+   *
+   * @author John Doe <email@example.com>
+   * @see Bar
+   * @see Ione
+   * @see Itwo
+   * @see Ithree
+   * @see Ifour
+   * @see Ifive
+   */
+  class Foo extends Bar implements Ione, Itwo, Ithree, Ifour, Ifive {
+
+  }
+
+======================================================
+
 Given (Class - Opening brace on a new line):
   class Foo
   {
