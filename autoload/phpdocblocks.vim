@@ -1,6 +1,3 @@
-" :PHPDocBlocks command
-command! -nargs=0 PHPDocBlocks :call phpdocblocks#insert()
-
 " Add '@return void' to procedures 
 let g:phpdocblocks_return_void = 1
 
