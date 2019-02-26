@@ -17,6 +17,7 @@ function! phpdocblocks#insert(...)
     "let l:output += [l:declarationLines]
     let l:code = ""
 
+    " TODO: Refactor this section
     " Function
     if matchstr(l:declarationLines, '\vfunction\s+') != ""
         let l:code = s:getCode("block")
@@ -41,6 +42,15 @@ function! phpdocblocks#insert(...)
         let l:docData = phpdocblocks#interface#parse(l:code)
         if type(l:docData) == v:t_dict
             let l:output += s:docTemplate(l:docData, "interface")
+        elseif type(l:docData) == v:t_list
+            let l:output += l:docData
+        endif
+    " Trait
+    elseif matchstr(l:declarationLines, '\vtrait\s+') != ""
+        let l:code = s:getCode("block")
+        let l:docData = phpdocblocks#trait#parse(l:code)
+        if type(l:docData) == v:t_dict
+            let l:output += s:docTemplate(l:docData, "trait")
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
