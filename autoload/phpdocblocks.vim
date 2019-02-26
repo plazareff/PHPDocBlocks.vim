@@ -7,8 +7,10 @@ let g:phpdocblocks_move_cursor = 0
 " Use abbreviated type names (bool/boolean and int/integer)
 let g:phpdocblocks_abbreviate_types = 1
 
+" g:phpdocblocks_templates_directory is set in plugin/phpdocblocks.vim
 
-" Inserts a doc block above the current cursor line
+
+" Inserts a doc block
 function! phpdocblocks#insert(...)
 
     let l:declarationLines = s:getUntilCharacter( ["{",";"] )
@@ -346,8 +348,7 @@ endfunction
 
 " Compose a doc block from a template
 function! s:docTemplate(docData, docType)
-    let l:path = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-    let l:templateLines = readfile(l:path."/PHPDocBlocks.vim/templates/".a:docType.".tpl")
+    let l:templateLines = readfile(g:phpdocblocks_templates_directory . a:docType . ".tpl")
     let l:output = []
     for l:templateLine in l:templateLines
         if l:templateLine[0] != "#" && l:templateLine != ""
