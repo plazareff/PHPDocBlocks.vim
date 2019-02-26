@@ -2,7 +2,7 @@
 let g:phpdocblocks_return_void = 1
 
 " Move cursor automatically
-let g:phpdocblocks_move_cursor = 1
+let g:phpdocblocks_move_cursor = 0
 
 " Use abbreviated type names (bool/boolean and int/integer)
 let g:phpdocblocks_abbreviate_types = 1
@@ -16,6 +16,7 @@ function! phpdocblocks#insert(...)
     let l:output = []
     "let l:output += [l:declarationLines]
     let l:code = ""
+    let l:outputBelowCursor = 0
 
     " TODO: Refactor this section
     " Function
@@ -77,6 +78,10 @@ function! phpdocblocks#insert(...)
         elseif type(l:docData) == v:t_list
             let l:output += l:docData
         endif
+    " File
+    elseif matchstr(getline('.'), '\v%^\s*\<\?php') != ""
+        let l:output += s:docTemplate([], "file")
+        let l:outputBelowCursor = 1
     else
         let l:output = ['error', 'Can''t find anything to document. (Move cursor to a line with a keyword)']
     endif
@@ -98,7 +103,11 @@ function! phpdocblocks#insert(...)
         for l:o in l:output
             let l:indentedOutput += [l:indent.l:o]
         endfor
-        call append((l:cursorLineNum-1), l:indentedOutput)
+        if l:outputBelowCursor == 1
+            call append((l:cursorLineNum), l:indentedOutput)
+        else
+            call append((l:cursorLineNum-1), l:indentedOutput)
+        endif
         "call append((l:cursorLineNum-1), l:code)
         if g:phpdocblocks_move_cursor == 1
             call cursor(l:cursorLineNum, 0)
@@ -357,7 +366,10 @@ endfunction
 " Convert template tags to documentation data
 function! s:transformTemplateLine(docData, tagName, templateLine)
     let l:output = []
-    if has_key(a:docData, a:tagName)
+    if a:tagName == "newline"
+        call add(l:output, "")
+    endif
+    if type(a:docData) == v:t_dict && has_key(a:docData, a:tagName)
         let l:lineRegex = '\v^(.{-})\{\{[ ]*'.a:tagName.'[ ]*\}\}(.{-})$'
         let l:linePart = matchlist(a:templateLine, l:lineRegex)
         if type(a:docData[a:tagName]) == v:t_list
